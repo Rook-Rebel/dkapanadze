@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "დავით კაპანაძე — აკადემიური პორტფოლიო",
+    name: "დავით კაპანაძე — აკადემიური ვებსაიტი",
     short_name: "დავით კაპანაძე",
     description:
       "მათემატიკა, კვლევა და განათლება — დავით კაპანაძის აკადემიური სივრცე.",
     start_url: "/",
     display: "standalone",
-    background_color: "#FCFCF8",
-    theme_color: "#FCFCF8",
+    background_color: "#faf9f4",
+    theme_color: "#faf9f4",
     lang: "ka",
     icons: [
       {

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Formula } from "./Formula";
-import { GlassCard } from "./GlassCard";
+import { getUi, type Locale } from "@/i18n";
 
 type ResearchCardProps = {
   index: string;
@@ -9,6 +9,8 @@ type ResearchCardProps = {
   description: string;
   formula: string | null;
   href: string;
+  locale: Locale;
+  headingLevel?: 2 | 3;
 };
 
 export function ResearchCard({
@@ -17,34 +19,37 @@ export function ResearchCard({
   description,
   formula,
   href,
+  locale,
+  headingLevel = 3,
 }: ResearchCardProps) {
+  const labels = getUi(locale);
+  const Heading = headingLevel === 2 ? "h2" : "h3";
+  const en = locale === "en";
   return (
-    <GlassCard className={`research-card research-card-${index}`}>
-      <div className="research-card-topline">
-        <span>{index}</span>
-        <Link href={href} aria-label={`${title} — ვრცლად`}>
-          <ArrowUpRight aria-hidden="true" />
-        </Link>
-      </div>
-      <h3>{title}</h3>
-      <p>{description}</p>
-      {formula ? (
-        <div className="research-formula">
+    <article className="research-item" data-reveal>
+      <p className="research-index" aria-hidden="true">
+        {index}
+      </p>
+      <Heading className="research-title">{title}</Heading>
+      <p className="research-text">{description}</p>
+      <div className="research-figure">
+        {formula ? (
           <Formula display>{formula}</Formula>
-        </div>
-      ) : (
-        <div className="learning-miniature" aria-hidden="true">
-          <span>ალგებრა</span>
-          <i>→</i>
-          <span>გეომეტრია</span>
-          <i>→</i>
-          <span>ანალიზი</span>
-        </div>
-      )}
+        ) : (
+          <p className="research-chain">
+            <span>{en ? "Algebra" : "ალგებრა"}</span>
+            <span aria-hidden="true">→</span>
+            <span>{en ? "Geometry" : "გეომეტრია"}</span>
+            <span aria-hidden="true">→</span>
+            <span>{en ? "Analysis" : "ანალიზი"}</span>
+          </p>
+        )}
+      </div>
       <Link className="text-link" href={href}>
-        მიმართულების ნახვა
-        <ArrowUpRight aria-hidden="true" />
+        {labels.viewDirection}
+        <span className="sr-only">: {title}</span>
+        <ArrowRight aria-hidden="true" />
       </Link>
-    </GlassCard>
+    </article>
   );
 }

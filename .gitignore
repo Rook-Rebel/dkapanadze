@@ -45,3 +45,9 @@ next-env.d.ts
 # local preview logs
 /dev.log
 /dev-error.log
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# local editor/agent tooling
+/.claude/

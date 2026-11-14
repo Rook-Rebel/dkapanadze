@@ -1,52 +1,32 @@
-"use client";
+import type { Locale } from "@/i18n";
+import { getContent } from "@/i18n/content";
+import { MathIcon, type MathIconName } from "./MathIcon";
+import { MathText } from "./MathText";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { learningSequence } from "@/content/site-content";
-
-export function LearningSequence() {
-  const reduceMotion = useReducedMotion();
-  const inlineFormula = "(x − a)²";
-
+export function LearningSequence({ locale }: { locale: Locale }) {
+  const steps = getContent(locale).learningSequence;
+  const en = locale === "en";
   return (
-    <ol className="learning-sequence" aria-label="სასწავლო თანმიმდევრობა">
-      {learningSequence.map((step, index) => (
-        <motion.li
-          key={step.title}
-          initial={reduceMotion ? false : { opacity: 0, x: -12 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: reduceMotion ? 0 : 0.35, delay: index * 0.07 }}
-        >
-          <div
-            className={`learning-step-icon learning-step-icon-${step.icon}`}
-            aria-hidden="true"
-          >
-            <span />
-            <span />
-          </div>
+    <ol
+      className="learning-sequence"
+      aria-label={en ? "Learning sequence" : "სასწავლო თანმიმდევრობა"}
+      data-reveal
+    >
+      {steps.map((step, index) => (
+        <li key={step.title} className="learning-step">
+          <span className="learning-step-marker">
+            <MathIcon name={step.icon as MathIconName} />
+          </span>
           <div className="learning-step-copy">
-            <span>ეტაპი {String(index + 1).padStart(2, "0")}</span>
-            <strong>{step.title}</strong>
+            <span className="learning-step-number">
+              {en ? "Step" : "ეტაპი"} {String(index + 1).padStart(2, "0")}
+            </span>
+            <h3 className="learning-step-title">{step.title}</h3>
             <p>
-              {step.description.includes(inlineFormula) ? (
-                <>
-                  {step.description.split(inlineFormula)[0]}
-                  <span className="math-inline" dir="ltr">
-                    {inlineFormula}
-                  </span>
-                  {step.description.split(inlineFormula)[1]}
-                </>
-              ) : (
-                step.description
-              )}
+              <MathText>{step.description}</MathText>
             </p>
           </div>
-          {index < learningSequence.length - 1 ? (
-            <i className="learning-step-arrow" aria-hidden="true">
-              →
-            </i>
-          ) : null}
-        </motion.li>
+        </li>
       ))}
     </ol>
   );

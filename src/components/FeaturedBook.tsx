@@ -1,72 +1,92 @@
 import Link from "next/link";
-import { ArrowUpRight, BookOpenText } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { getUi, type Locale } from "@/i18n";
+import { getSiteText } from "@/i18n/site";
 
-export function FeaturedBook({ compact = false }: { compact?: boolean }) {
+export function FeaturedBook({
+  compact = false,
+  locale,
+  headingId,
+}: {
+  compact?: boolean;
+  locale: Locale;
+  headingId?: string;
+}) {
+  const text = getSiteText(locale);
+  const labels = getUi(locale);
+  const en = locale === "en";
+  const book = siteConfig.book;
+
   return (
-    <article className={`featured-book ${compact ? "featured-book-compact" : ""}`}>
-      <div
-        className="book-visual"
-        role="img"
-        aria-label="წიგნის ტიპოგრაფიული ვიზუალი, არა ოფიციალური ყდა"
-      >
-        <span className="book-visual-note">ტიპოგრაფიული ვიზუალი · არა ოფიციალური ყდა</span>
-        <BookOpenText aria-hidden="true" />
-        <strong lang="en">{siteConfig.book.title}</strong>
-        <i lang="en">{siteConfig.book.subtitle}</i>
-        <small lang="en">{siteConfig.book.author}</small>
-      </div>
+    <article className={`book ${compact ? "book-compact" : ""}`.trim()} aria-labelledby={headingId} data-reveal>
+      <figure className="book-plate">
+        <div className="book-cover" aria-hidden="true">
+          <span className="book-cover-mark">∂</span>
+          <strong lang="en">{book.title}</strong>
+          <span className="book-cover-subtitle" lang="en">
+            {book.subtitle}
+          </span>
+          <span className="book-cover-author" lang="en">
+            {book.author}
+          </span>
+        </div>
+        <figcaption>
+          {en ? "Typographic rendering — not the official cover" : "ტიპოგრაფიული გამოსახულება — არა ოფიციალური ყდა"}
+        </figcaption>
+      </figure>
+
       <div className="book-content">
-        <p className="eyebrow font-archy-bold">მთავარი წიგნი</p>
-        <h2 lang="en">{siteConfig.book.title}</h2>
+        <p className="eyebrow">{en ? "Monograph · " : "მონოგრაფია · "}{book.publisher}</p>
+        <h2 id={headingId} className="book-title" lang="en">
+          {book.title}
+        </h2>
         <p className="book-subtitle" lang="en">
-          {siteConfig.book.subtitle}
+          {book.subtitle}
         </p>
-        <p>{siteConfig.book.description}</p>
-        <dl className="book-metadata">
+        <p className="book-description">{text.book.description}</p>
+        <dl className="book-meta">
           <div>
-            <dt>ავტორი</dt>
-            <dd>{siteConfig.book.author}</dd>
+            <dt>{en ? "Author" : "ავტორი"}</dt>
+            <dd lang="en">{book.author}</dd>
           </div>
           <div>
-            <dt>გამომცემლობა</dt>
-            <dd>{siteConfig.book.publisher}</dd>
+            <dt>{en ? "Publisher" : "გამომცემლობა"}</dt>
+            <dd lang="en">{book.publisher}</dd>
           </div>
           <div>
-            <dt>გამოცემის თარიღი</dt>
-            <dd>{siteConfig.book.publicationDate}</dd>
+            <dt>{en ? "Published" : "გამოცემის თარიღი"}</dt>
+            <dd>{text.book.publicationDate}</dd>
           </div>
           <div>
-            <dt>ენა / გვერდები</dt>
+            <dt>{en ? "Language · Pages" : "ენა · გვერდები"}</dt>
             <dd>
-              {siteConfig.book.language} · {siteConfig.book.pageCount}
+              {text.book.language} · {book.pageCount}
             </dd>
           </div>
           <div>
-            <dt>რბილი ყდა</dt>
-            <dd>ISBN {siteConfig.book.softcoverIsbn}</dd>
+            <dt>{en ? "Softcover ISBN" : "რბილი ყდა, ISBN"}</dt>
+            <dd translate="no">{book.softcoverIsbn}</dd>
           </div>
           <div>
-            <dt>ელექტრონული წიგნი</dt>
-            <dd>ISBN {siteConfig.book.ebookIsbn}</dd>
+            <dt>{en ? "E-book ISBN" : "ელექტრონული წიგნი, ISBN"}</dt>
+            <dd translate="no">{book.ebookIsbn}</dd>
           </div>
         </dl>
         <div className="book-actions">
           <a
             className="button button-primary"
-            href={siteConfig.book.officialUrl}
+            href={book.officialUrl}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Calculus Without Limits-ის ოფიციალური გვერდის გახსნა ახალ ჩანართში"
           >
-            წიგნის ნახვა
+            {en ? "View at the publisher" : "გამომცემლის გვერდი"}
             <ArrowUpRight aria-hidden="true" />
+            <span className="sr-only"> {labels.newTab}</span>
           </a>
-          <Link
-            className="button button-secondary"
-            href={`/publications/${siteConfig.book.slug}`}
-          >
-            წიგნის შესახებ
+          <Link className="text-link" href={`/publications/${book.slug}`}>
+            {en ? "About the book" : "წიგნის შესახებ"}
+            <ArrowRight aria-hidden="true" />
           </Link>
         </div>
       </div>

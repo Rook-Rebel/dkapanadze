@@ -1,22 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink, FileText } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import { Formula } from "@/components/Formula";
-import { GlassCard } from "@/components/GlassCard";
+import { PageHeader } from "@/components/PageHeader";
 import { PublicationCard } from "@/components/PublicationCard";
 import { StructuredData } from "@/components/StructuredData";
-import { siteConfig } from "@/config/site";
-import {
-  getCitation,
-  getPublication,
-  publications,
-  type Publication,
-} from "@/data/publications";
-import { breadcrumbJsonLd } from "@/lib/json-ld";
+import { getCitation, publications } from "@/data/publications";
+import { bookJsonLd, breadcrumbJsonLd, scholarlyArticleJsonLd } from "@/lib/json-ld";
+import { formatIsoDate } from "@/lib/format";
 import { createMetadata } from "@/lib/metadata";
+import { getLocale } from "@/i18n/server";
+import { getLocalizedPublication, getPublications } from "@/i18n/publications";
+import { getUi } from "@/i18n";
 
 type PublicationPageProps = {
   params: Promise<{ slug: string }>;
@@ -26,89 +23,35 @@ export function generateStaticParams() {
   return publications.map((publication) => ({ slug: publication.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: PublicationPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PublicationPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const publication = getPublication(slug);
+  const locale = await getLocale();
+  const publication = getLocalizedPublication(slug, locale);
   if (!publication) return {};
 
   return createMetadata({
-    title: publication.georgianTitle,
+    title: locale === "en" ? publication.title : publication.georgianTitle,
     description: publication.summary,
     path: `/publications/${publication.slug}`,
-    type: "article",
+    type: publication.category === "monograph" ? "book" : "article",
     keywords: publication.keywords,
+    locale,
   });
 }
 
-function scholarlyArticleJsonLd(publication: Publication) {
-  const article: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "ScholarlyArticle",
-    "@id": `${siteConfig.domain}/publications/${publication.slug}#article`,
-    url: `${siteConfig.domain}/publications/${publication.slug}`,
-    name: publication.title,
-    headline: publication.title,
-    alternativeHeadline: publication.georgianTitle,
-    author: { "@id": `${siteConfig.domain}/#person` },
-    inLanguage: "en",
-    abstract: publication.abstract,
-    keywords: publication.keywords.join(", "),
-    isPartOf: { "@id": `${siteConfig.domain}/#website` },
-  };
-
-  if (/^\d{4}$/.test(publication.year)) {
-    article.dateCreated = publication.year;
-  }
-  if (publication.externalUrl) article.sameAs = publication.externalUrl;
-  if (publication.arxivId) article.identifier = `arXiv:${publication.arxivId}`;
-  if (publication.publisher) {
-    article.publisher = {
-      "@type": "Organization",
-      name: publication.publisher,
-    };
-  }
-  if (publication.isbn) article.isbn = publication.isbn;
-
-  return article;
-}
-
-function bookJsonLd(publication: Publication) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Book",
-    "@id": `${siteConfig.domain}/publications/${publication.slug}#book`,
-    url: `${siteConfig.domain}/publications/${publication.slug}`,
-    name: publication.title,
-    alternateName: publication.georgianTitle,
-    author: { "@id": `${siteConfig.domain}/#person` },
-    publisher: publication.publisher
-      ? { "@type": "Organization", name: publication.publisher }
-      : undefined,
-    datePublished: publication.publicationDate,
-    inLanguage: publication.language === "English" ? "en" : undefined,
-    numberOfPages: publication.pageCount,
-    isbn: [publication.isbn, publication.ebookIsbn].filter(Boolean),
-    description: publication.abstract,
-    sameAs: publication.externalUrl,
-  };
-}
-
-export default async function PublicationDetailPage({
-  params,
-}: PublicationPageProps) {
+export default async function PublicationDetailPage({ params }: PublicationPageProps) {
   const { slug } = await params;
-  const publication = getPublication(slug);
+  const locale = await getLocale();
+  const publication = getLocalizedPublication(slug, locale);
   if (!publication) notFound();
 
-  const currentIndex = publications.findIndex((item) => item.slug === slug);
-  const previous = currentIndex > 0 ? publications[currentIndex - 1] : null;
-  const next =
-    currentIndex < publications.length - 1
-      ? publications[currentIndex + 1]
-      : null;
-  const related = publications
+  const en = locale === "en";
+  const labels = getUi(locale);
+  const all = getPublications(locale);
+  const currentIndex = all.findIndex((item) => item.slug === slug);
+  const previous = currentIndex > 0 ? all[currentIndex - 1] : null;
+  const next = currentIndex < all.length - 1 ? all[currentIndex + 1] : null;
+  const related = all
     .filter(
       (item) =>
         item.slug !== publication.slug &&
@@ -117,81 +60,93 @@ export default async function PublicationDetailPage({
     )
     .slice(0, 2);
   const citation = getCitation(publication);
+  const publicationsLabel = en ? "Publications" : "ნაშრომები";
   const crumbs = [
-    { name: "მთავარი", href: "/" },
-    { name: "ნაშრომები", href: "/publications" },
-    {
-      name: publication.georgianTitle,
-      href: `/publications/${publication.slug}`,
-    },
+    { name: labels.home, href: "/" },
+    { name: publicationsLabel, href: "/publications" },
+    { name: en ? publication.title : publication.georgianTitle, href: `/publications/${publication.slug}` },
   ];
+
+  const details: Array<{ term: string; value: string; lang?: string; translate?: boolean }> = [
+    { term: en ? "Author" : "ავტორი", value: publication.author, lang: "en" },
+    { term: en ? "Year" : "წელი", value: publication.year },
+    { term: en ? "Type" : "ტიპი", value: publication.type },
+    { term: en ? "Status" : "სტატუსი", value: publication.status },
+    { term: en ? "Category" : "კატეგორია", value: publication.categoryLabel },
+  ];
+  if (publication.arxivId) details.push({ term: "arXiv", value: publication.arxivId, translate: false });
+  if (publication.publication)
+    details.push({ term: en ? "Published in" : "გამოცემა", value: publication.publication, lang: "en" });
+  if (publication.publisher)
+    details.push({ term: en ? "Publisher" : "გამომცემლობა", value: publication.publisher, lang: "en" });
+  if (publication.publicationDate)
+    details.push({ term: en ? "Publication date" : "გამოცემის თარიღი", value: formatIsoDate(publication.publicationDate, locale) });
+  if (publication.language)
+    details.push({ term: en ? "Language" : "ენა", value: en ? publication.language : publication.language === "English" ? "ინგლისური" : publication.language });
+  if (publication.pageCount)
+    details.push({ term: en ? "Pages" : "გვერდები", value: String(publication.pageCount) });
+  if (publication.isbn)
+    details.push({ term: en ? "Softcover ISBN" : "ISBN (რბილი ყდა)", value: publication.isbn, translate: false });
+  if (publication.ebookIsbn)
+    details.push({ term: en ? "E-book ISBN" : "ISBN (ელექტრონული)", value: publication.ebookIsbn, translate: false });
 
   return (
     <>
       <StructuredData
         data={[
-          publication.category === "monograph"
-            ? bookJsonLd(publication)
-            : scholarlyArticleJsonLd(publication),
+          publication.category === "monograph" ? bookJsonLd(publication) : scholarlyArticleJsonLd(publication),
           breadcrumbJsonLd(crumbs),
         ]}
       />
-      <header className="page-hero publication-detail">
-        <div className="site-shell page-hero-inner">
-          <Breadcrumbs
-            items={[
-              { label: "ნაშრომები", href: "/publications" },
-              { label: publication.georgianTitle },
-            ]}
-          />
-          <p className="eyebrow">{publication.categoryLabel}</p>
-          <h1 lang="en">{publication.title}</h1>
-          {publication.subtitle ? (
-            <p className="publication-detail-subtitle" lang="en">
-              {publication.subtitle}
-            </p>
-          ) : null}
-          <p className="publication-detail-georgian">
-            {publication.georgianTitle}
+      <PageHeader
+        locale={locale}
+        variant="publication"
+        breadcrumbs={[
+          { label: publicationsLabel, href: "/publications" },
+          en ? { label: publication.title, lang: "en" } : { label: publication.georgianTitle },
+        ]}
+        eyebrow={`${publication.categoryLabel} · ${publication.type}`}
+        title={publication.title}
+        titleLang="en"
+      >
+        {publication.subtitle ? (
+          <p className="publication-subtitle" lang="en">
+            {publication.subtitle}
           </p>
-          <div className="publication-detail-meta">
-            <span className="badge badge-status">{publication.status}</span>
-            <span className="badge">{publication.type}</span>
-            <span className="badge">{publication.year}</span>
-            <span className="badge" lang="en">
-              {publication.author}
-            </span>
-            {publication.arxivId ? (
-              <span className="badge arxiv-badge">
-                arXiv:{publication.arxivId}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </header>
+        ) : null}
+        {publication.showGeorgianTitle ? (
+          <p className="publication-title-ka">{publication.georgianTitle}</p>
+        ) : null}
+        <p className="publication-meta-line">
+          <span lang="en">{publication.author}</span>
+          <span>{publication.year}</span>
+          <span>{publication.status}</span>
+          {publication.arxivId ? <span translate="no">arXiv:{publication.arxivId}</span> : null}
+        </p>
+      </PageHeader>
 
-      <div className="site-shell page-content publication-detail-grid">
-        <article>
-          <section className="editorial-section">
-            <h2>ანოტაცია</h2>
+      <div className="site-shell page-body detail-layout">
+        <article className="prose detail-body">
+          <section aria-labelledby="abstract-heading">
+            <h2 id="abstract-heading">{en ? "Abstract" : "ანოტაცია"}</h2>
             <p>{publication.abstract}</p>
           </section>
 
           {publication.formulas.length ? (
-            <section className="editorial-section">
-              <h2>ძირითადი ფორმულები</h2>
-              <div className="formula-stack">
+            <section aria-labelledby="formulas-heading">
+              <h2 id="formulas-heading">{en ? "Key formulas" : "ძირითადი ფორმულები"}</h2>
+              <div className="formula-panel formula-panel-stack">
                 {publication.formulas.map((formula) => (
-                  <div className="formula-panel" key={formula}>
-                    <Formula display>{formula}</Formula>
-                  </div>
+                  <Formula display key={formula}>
+                    {formula}
+                  </Formula>
                 ))}
               </div>
             </section>
           ) : null}
 
-          <section className="editorial-section">
-            <h2>საკვანძო სიტყვები</h2>
+          <section aria-labelledby="keywords-heading">
+            <h2 id="keywords-heading">{en ? "Keywords" : "საკვანძო სიტყვები"}</h2>
             <ul className="keyword-list">
               {publication.keywords.map((keyword) => (
                 <li key={keyword}>{keyword}</li>
@@ -199,132 +154,113 @@ export default async function PublicationDetailPage({
             </ul>
           </section>
 
-          <section className="editorial-section">
-            <h2>ციტირება</h2>
-            <div className="citation-block">
-              <p>{citation}</p>
-              <CopyButton value={citation} label="ციტირების კოპირება" />
+          <section aria-labelledby="citation-heading">
+            <h2 id="citation-heading">{en ? "Citation" : "ციტირება"}</h2>
+            <div className="citation">
+              <p lang="en">{citation}</p>
+              <CopyButton value={citation} label={labels.copyCitation} locale={locale} />
             </div>
           </section>
 
           {related.length ? (
-            <section className="editorial-section">
-              <h2>დაკავშირებული კვლევა</h2>
-              <div className="publication-list">
+            <section aria-labelledby="related-heading">
+              <h2 id="related-heading">{en ? "Related publications" : "დაკავშირებული ნაშრომები"}</h2>
+              <div className="pub-list pub-list-tight">
                 {related.map((item) => (
-                  <PublicationCard key={item.slug} publication={item} compact />
+                  <PublicationCard key={item.slug} publication={item} compact locale={locale} />
                 ))}
               </div>
             </section>
           ) : null}
-
-          <nav className="publication-pagination" aria-label="ნაშრომებს შორის გადასვლა">
-            {previous ? (
-              <Link href={`/publications/${previous.slug}`}>
-                <span>← წინა ნაშრომი</span>
-                <strong>{previous.georgianTitle}</strong>
-              </Link>
-            ) : (
-              <span />
-            )}
-            {next ? (
-              <Link href={`/publications/${next.slug}`}>
-                <span>შემდეგი ნაშრომი →</span>
-                <strong>{next.georgianTitle}</strong>
-              </Link>
-            ) : null}
-          </nav>
         </article>
 
-        <GlassCard as="aside" className="detail-sidebar">
-          <dl>
-            <div>
-              <dt>ავტორი</dt>
-              <dd>{publication.author}</dd>
-            </div>
-            <div>
-              <dt>წელი</dt>
-              <dd>{publication.year}</dd>
-            </div>
-            <div>
-              <dt>ტიპი</dt>
-              <dd>{publication.type}</dd>
-            </div>
-            <div>
-              <dt>კატეგორია</dt>
-              <dd>{publication.categoryLabel}</dd>
-            </div>
-            {publication.publisher ? (
-              <div>
-                <dt>გამომცემლობა</dt>
-                <dd>{publication.publisher}</dd>
+        <aside className="detail-aside" aria-labelledby="details-heading">
+          <h2 id="details-heading" className="subheading">
+            {en ? "Bibliographic details" : "ბიბლიოგრაფიული მონაცემები"}
+          </h2>
+          <dl className="detail-facts">
+            {details.map((row) => (
+              <div key={row.term}>
+                <dt>{row.term}</dt>
+                <dd lang={row.lang} translate={row.translate === false ? "no" : undefined}>
+                  {row.value}
+                </dd>
               </div>
-            ) : null}
-            {publication.isbn ? (
-              <div>
-                <dt>ISBN</dt>
-                <dd>{publication.isbn}</dd>
-              </div>
-            ) : null}
-            {publication.ebookIsbn ? (
-              <div>
-                <dt>ელექტრონული ISBN</dt>
-                <dd>{publication.ebookIsbn}</dd>
-              </div>
-            ) : null}
-            {publication.publicationDate ? (
-              <div>
-                <dt>გამოცემის თარიღი</dt>
-                <dd>{publication.publicationDate}</dd>
-              </div>
-            ) : null}
-            {publication.pageCount ? (
-              <div>
-                <dt>გვერდები</dt>
-                <dd>{publication.pageCount}</dd>
-              </div>
-            ) : null}
-            {publication.publication ? (
-              <div>
-                <dt>გამოცემა</dt>
-                <dd>{publication.publication}</dd>
-              </div>
-            ) : null}
+            ))}
           </dl>
+          {publication.externalUrl || publication.pdfUrl ? (
           <div className="detail-actions">
-            <CopyButton value={citation} label="ციტირების კოპირება" />
             {publication.externalUrl ? (
               <a
-                className="copy-button"
+                className="button button-primary"
                 href={publication.externalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="გარე წყაროს გახსნა ახალ ჩანართში"
               >
-                <ExternalLink aria-hidden="true" />
                 {publication.arxivId
-                  ? "arXiv-ზე ნახვა"
-                  : "გარე წყაროს ნახვა"}
+                  ? en
+                    ? "View on arXiv"
+                    : "arXiv-ზე ნახვა"
+                  : publication.category === "monograph"
+                    ? en
+                      ? "View at the publisher"
+                      : "გამომცემლის გვერდი"
+                    : labels.externalSource}
+                <ArrowUpRight aria-hidden="true" />
+                <span className="sr-only"> {labels.newTab}</span>
               </a>
             ) : null}
             {publication.pdfUrl ? (
               <a
-                className="copy-button"
+                className="button button-secondary"
                 href={publication.pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="ნაშრომის PDF-ის გახსნა ახალ ჩანართში"
               >
-                <FileText aria-hidden="true" />
-                PDF-ის გახსნა
+                {en ? "Open PDF" : "PDF-ის გახსნა"}
+                <ArrowUpRight aria-hidden="true" />
+                <span className="sr-only"> {labels.newTab}</span>
               </a>
             ) : null}
           </div>
-          {publication.verificationNote ? (
-            <p className="verification-note">{publication.verificationNote}</p>
           ) : null}
-        </GlassCard>
+          {publication.verificationNote ? (
+            <p className="detail-note">
+              <strong>{en ? "Note" : "შენიშვნა"}:</strong> {publication.verificationNote}
+            </p>
+          ) : null}
+        </aside>
       </div>
+
+      <nav
+        className="site-shell pager"
+        aria-label={en ? "Previous and next publication" : "წინა და შემდეგი ნაშრომი"}
+      >
+        {previous ? (
+          <Link className="pager-link pager-prev" href={`/publications/${previous.slug}`} rel="prev">
+            <span className="pager-label">
+              <ArrowLeft aria-hidden="true" />
+              {en ? "Previous" : "წინა"}
+            </span>
+            <span className="pager-title" lang={en ? "en" : undefined}>
+              {en ? previous.title : previous.georgianTitle}
+            </span>
+          </Link>
+        ) : (
+          <span />
+        )}
+        {next ? (
+          <Link className="pager-link pager-next" href={`/publications/${next.slug}`} rel="next">
+            <span className="pager-label">
+              {en ? "Next" : "შემდეგი"}
+              <ArrowRight aria-hidden="true" />
+            </span>
+            <span className="pager-title" lang={en ? "en" : undefined}>
+              {en ? next.title : next.georgianTitle}
+            </span>
+          </Link>
+        ) : null}
+      </nav>
     </>
   );
 }

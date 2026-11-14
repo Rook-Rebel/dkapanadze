@@ -1,144 +1,95 @@
-"use client";
+import type { Locale } from "@/i18n";
+import { Formula } from "./Formula";
 
-import { motion, useReducedMotion } from "framer-motion";
+/*
+ * f(x) = x³/6 − x/2 + 1 with its tangent at a = 3/2.
+ * f(x) − Tₐ(x) = (1/6)(x − 3/2)²(x + 3), so the line genuinely touches the
+ * curve at x = a (a double root) and the drawing is mathematically exact.
+ */
+const view = { width: 360, height: 250, left: 22, right: 340, top: 18, bottom: 226 };
+const domain = { xMin: -2.6, xMax: 3, yMin: -1.9, yMax: 4.2 };
+const a = 1.5;
 
-export function PolynomialVisual() {
-  const reduceMotion = useReducedMotion();
+const f = (x: number) => x ** 3 / 6 - x / 2 + 1;
+const fPrime = (x: number) => x ** 2 / 2 - 1 / 2;
+const tangent = (x: number) => f(a) + fPrime(a) * (x - a);
 
+const sx = (x: number) =>
+  view.left + ((x - domain.xMin) / (domain.xMax - domain.xMin)) * (view.right - view.left);
+const sy = (y: number) =>
+  view.bottom - ((y - domain.yMin) / (domain.yMax - domain.yMin)) * (view.bottom - view.top);
+
+const curvePath = Array.from({ length: 81 }, (_, index) => {
+  const x = domain.xMin + (index / 80) * (domain.xMax - domain.xMin);
+  return `${index === 0 ? "M" : "L"}${sx(x).toFixed(1)} ${sy(f(x)).toFixed(1)}`;
+}).join(" ");
+
+const tangentStart = { x: sx(-1.2), y: sy(tangent(-1.2)) };
+const tangentEnd = { x: sx(3), y: sy(tangent(3)) };
+const point = { x: sx(a), y: sy(f(a)) };
+const gridX = [-2, -1, 0, 1, 2, 3];
+const gridY = [-1, 0, 1, 2, 3, 4];
+
+export function PolynomialVisual({ locale }: { locale: Locale }) {
+  const en = locale === "en";
   return (
-    <div className="polynomial-visual">
-      <div className="visual-caption">
-        <span>ორმაგი ფესვი</span>
-        <span className="caption-line" />
-        <span>მხები</span>
-      </div>
+    <figure className="graph-card">
       <svg
-        viewBox="0 0 620 520"
+        viewBox={`0 0 ${view.width} ${view.height}`}
         role="img"
-        aria-labelledby="polynomial-title polynomial-description"
+        aria-labelledby="hero-graph-title hero-graph-desc"
       >
-        <title id="polynomial-title">მრავალწევრის გრაფიკი და მხები წრფე</title>
-        <desc id="polynomial-description">
-          მრუდი და მხები ერთმანეთს მონიშნულ წერტილში ეხება; ორმაგი რგოლი
-          ორმაგი ფესვის ალგებრულ პირობას აღნიშნავს.
+        <title id="hero-graph-title">
+          {en ? "A polynomial graph and its tangent line" : "მრავალწევრის გრაფიკი და მისი მხები წრფე"}
+        </title>
+        <desc id="hero-graph-desc">
+          {en
+            ? "The line touches the curve at x = a; there the difference between the function and the line has a double root."
+            : "წრფე მრუდს x = a წერტილში ეხება; ამ წერტილში ფუნქციისა და წრფის სხვაობას ორმაგი ფესვი აქვს."}
         </desc>
-        <defs>
-          <linearGradient id="curveGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--graph-purple)" />
-            <stop offset="1" stopColor="var(--graph-purple-strong)" />
-          </linearGradient>
-          <radialGradient id="pointGlow">
-            <stop offset="0" stopColor="var(--graph-point)" stopOpacity=".95" />
-            <stop offset=".35" stopColor="var(--graph-green)" stopOpacity=".72" />
-            <stop offset="1" stopColor="var(--graph-green)" stopOpacity="0" />
-          </radialGradient>
-          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <g className="visual-grid">
-          {Array.from({ length: 9 }, (_, index) => (
-            <line
-              key={`v-${index}`}
-              x1={70 + index * 60}
-              y1="48"
-              x2={70 + index * 60}
-              y2="454"
-            />
+        <g className="graph-grid">
+          {gridX.map((x) => (
+            <line key={`x${x}`} x1={sx(x)} x2={sx(x)} y1={view.top} y2={view.bottom} />
           ))}
-          {Array.from({ length: 7 }, (_, index) => (
-            <line
-              key={`h-${index}`}
-              x1="48"
-              y1={76 + index * 58}
-              x2="572"
-              y2={76 + index * 58}
-            />
+          {gridY.map((y) => (
+            <line key={`y${y}`} x1={view.left} x2={view.right} y1={sy(y)} y2={sy(y)} />
           ))}
         </g>
-
-        <line className="axis" x1="48" y1="396" x2="572" y2="396" />
-        <line className="axis" x1="126" y1="48" x2="126" y2="454" />
-
-        <motion.path
-          className="curve-path"
-          d="M54 374 C120 330 174 302 230 289 C300 272 338 257 378 203 C421 145 462 79 560 56"
-          fill="none"
-          stroke="url(#curveGradient)"
-          strokeWidth="5"
-          strokeLinecap="round"
-          initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: reduceMotion ? 0 : 1.5, ease: "easeInOut" }}
+        <line className="graph-axis" x1={view.left} x2={view.right} y1={sy(0)} y2={sy(0)} />
+        <line className="graph-axis" x1={sx(0)} x2={sx(0)} y1={view.top} y2={view.bottom} />
+        <line
+          className="graph-guide"
+          x1={point.x}
+          x2={point.x}
+          y1={point.y}
+          y2={sy(0)}
         />
-        <motion.line
-          x1="98"
-          y1="370"
-          x2="548"
-          y2="92"
-          stroke="var(--graph-green)"
-          strokeWidth="2.5"
-          strokeDasharray="8 8"
-          initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.9 }}
-          transition={{ duration: reduceMotion ? 0 : 1.15, delay: 0.5 }}
+        <path className="graph-curve" d={curvePath} pathLength={1} />
+        <line
+          className="graph-tangent"
+          x1={tangentStart.x}
+          y1={tangentStart.y}
+          x2={tangentEnd.x}
+          y2={tangentEnd.y}
         />
-
-        <motion.circle
-          cx="326"
-          cy="229"
-          r="35"
-          fill="url(#pointGlow)"
-          animate={
-            reduceMotion
-              ? undefined
-              : { scale: [0.92, 1.08, 0.92], opacity: [0.65, 1, 0.65] }
-          }
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "326px 229px" }}
-        />
-        <circle
-          cx="326"
-          cy="229"
-          r="8"
-          fill="var(--graph-point)"
-          stroke="var(--graph-purple)"
-          strokeWidth="3"
-          filter="url(#softGlow)"
-        />
-        <circle
-          cx="326"
-          cy="229"
-          r="17"
-          fill="none"
-          stroke="var(--graph-green)"
-          strokeWidth="1.5"
-          strokeDasharray="3 5"
-        />
-
-        <g className="visual-label">
-          <rect x="350" y="233" width="132" height="38" rx="19" />
-          <text x="416" y="258" textAnchor="middle">
-            x = a
-          </text>
-        </g>
-        <text className="line-label" x="463" y="118">
-          Tₐ(x)
-        </text>
-        <text className="curve-label" x="505" y="68">
+        <circle className="graph-point-ring" cx={point.x} cy={point.y} r="9" />
+        <circle className="graph-point" cx={point.x} cy={point.y} r="4" />
+        <text className="graph-label graph-label-curve" x={sx(2.05)} y={sy(3.45)}>
           f(x)
         </text>
+        <text className="graph-label graph-label-tangent" x={sx(2.35)} y={sy(tangent(2.35)) + 22}>
+          Tₐ(x)
+        </text>
+        <text className="graph-label graph-label-axis" x={point.x} y={sy(0) + 17} textAnchor="middle">
+          a
+        </text>
       </svg>
-      <div className="visual-equation">
-        <span>შეხება</span>
-        <strong>⇔</strong>
-        <span>(x − a)²</span>
-      </div>
-    </div>
+      <figcaption>
+        <span>{en ? "Tangency" : "შეხება"}</span>
+        <span aria-hidden="true">⇔</span>
+        <span className="sr-only">{en ? "is equivalent to the factor" : "ტოლფასია მამრავლისა"}</span>
+        <Formula>{"(x-a)^2"}</Formula>
+      </figcaption>
+    </figure>
   );
 }

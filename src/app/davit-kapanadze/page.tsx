@@ -1,36 +1,46 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ExternalLink } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { ProfileSidebar } from "@/components/ProfileSidebar";
+import { ArrowRight } from "lucide-react";
 import { MembershipCard } from "@/components/MembershipCard";
+import { PageHeader } from "@/components/PageHeader";
+import { ProfileSidebar } from "@/components/ProfileSidebar";
 import { StructuredData } from "@/components/StructuredData";
 import { siteConfig } from "@/config/site";
-import { aboutContent } from "@/content/site-content";
+import { getLocale } from "@/i18n/server";
+import { getContent, getPageText } from "@/i18n/content";
+import { getUi } from "@/i18n";
+import { getSiteText } from "@/i18n/site";
 import { breadcrumbJsonLd, personJsonLd, webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
 
-const description =
-  "დავით კაპანაძის აკადემიური პროფილი, კვლევითი ინტერესები, პედაგოგიური ხედვა, პროფესიული კავშირები და დადასტურებული საკონტაქტო ინფორმაცია.";
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = getPageText(locale).about;
+  return createMetadata({
+    title: t.metaTitle,
+    description: t.description,
+    path: "/davit-kapanadze",
+    type: "profile",
+    image: {
+      url: siteConfig.portrait.src,
+      width: siteConfig.portrait.width,
+      height: siteConfig.portrait.height,
+      alt: getSiteText(locale).portraitAlt,
+    },
+    locale,
+  });
+}
 
-export const metadata: Metadata = createMetadata({
-  title: "დავით კაპანაძე",
-  description,
-  path: "/davit-kapanadze",
-  image: {
-    url: siteConfig.portrait.src,
-    width: siteConfig.portrait.width,
-    height: siteConfig.portrait.height,
-    alt: siteConfig.portrait.alt,
-  },
-});
+export default async function AboutPage() {
+  const locale = await getLocale();
+  const t = getPageText(locale).about;
+  const { aboutContent } = getContent(locale);
+  const labels = getUi(locale);
+  const crumbs = [
+    { name: labels.home, href: "/" },
+    { name: t.title, href: "/davit-kapanadze" },
+  ];
 
-const crumbs = [
-  { name: "მთავარი", href: "/" },
-  { name: "დავით კაპანაძე", href: "/davit-kapanadze" },
-];
-
-export default function AboutPage() {
   return (
     <>
       <StructuredData
@@ -38,39 +48,33 @@ export default function AboutPage() {
           personJsonLd,
           webPageJsonLd({
             type: "ProfilePage",
-            name: "დავით კაპანაძე — აკადემიური პროფილი",
-            description,
+            name: `${t.title} — ${t.eyebrow}`,
+            description: t.description,
             path: "/davit-kapanadze",
+            locale,
           }),
           breadcrumbJsonLd(crumbs),
         ]}
       />
-      <header className="page-hero">
-        <div className="site-shell page-hero-inner">
-          <Breadcrumbs items={[{ label: "დავით კაპანაძე" }]} />
-          <p className="eyebrow">აკადემიური პროფილი</p>
-          <h1>დავით კაპანაძე</h1>
-          <p className="lede">
-            პედაგოგიკურ მეცნიერებათა დოქტორი და საქართველოს ეროვნული
-            უნივერსიტეტ SEU-ს ბიზნესისა და ტექნოლოგიების ფაკულტეტის პროფესორი
-            — კვლევითი ინტერესებით მათემატიკური ანალიზის, ფრაქციული აღრიცხვისა
-            და მათემატიკის განათლების მიმართულებით.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        locale={locale}
+        breadcrumbs={[{ label: t.title }]}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        lede={t.lede}
+      />
 
-      <div className="site-shell page-content profile-layout">
-        <article className="editorial-copy">
-          <section>
-            <p className="eyebrow">პროფილი</p>
-            <h2>მოკლე ბიოგრაფია</h2>
+      <div className="site-shell page-body profile-layout">
+        <article className="prose">
+          <section aria-labelledby="bio-title">
+            <h2 id="bio-title">{t.biography}</h2>
             {aboutContent.biography.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </section>
 
-          <section>
-            <h2>კვლევითი ინტერესები</h2>
+          <section aria-labelledby="interests-title">
+            <h2 id="interests-title">{t.interests}</h2>
             <ul>
               {aboutContent.interests.map((interest) => (
                 <li key={interest}>{interest}</li>
@@ -78,62 +82,40 @@ export default function AboutPage() {
             </ul>
           </section>
 
-          <section>
-            <h2>აკადემიური საქმიანობა</h2>
+          <section aria-labelledby="activity-title">
+            <h2 id="activity-title">{t.activity}</h2>
             <p>{aboutContent.academicActivity}</p>
             <Link className="text-link" href="/publications">
-              ნაშრომების ბიბლიოგრაფიის ნახვა
+              {t.bibliography}
               <ArrowRight aria-hidden="true" />
             </Link>
           </section>
 
-          <section>
-            <h2>პედაგოგიური ხედვა</h2>
+          <section aria-labelledby="vision-title">
+            <h2 id="vision-title">{t.teaching}</h2>
             <p>{aboutContent.teachingVision}</p>
             <Link className="text-link" href="/teaching">
-              სწავლების მიდგომის სრულად ნახვა
+              {t.teachingAction}
               <ArrowRight aria-hidden="true" />
             </Link>
           </section>
 
-          <section>
-            <h2>პროფესიული კავშირები</h2>
-            <p>
-              დადასტურებული აკადემიური კავშირია{" "}
-              <strong>{siteConfig.affiliation.name}</strong>, თბილისი,
-              საქართველო. დავით კაპანაძე ასევე არის{" "}
-              <strong>
-                {siteConfig.membership.name}-ის {siteConfig.membership.role} (
-                {siteConfig.membership.postNominal})
-              </strong>
-              , გაერთიანებული სამეფო.
-            </p>
+          <section aria-labelledby="connections-title">
+            <h2 id="connections-title">{t.connections}</h2>
+            <p>{t.connectionsText}</p>
           </section>
 
-          <section>
-            <h2>ORCID და აკადემიური პროფილები</h2>
-            <p>
-              დადასტურებული საჯარო პროფილებია ORCID, Academia.edu, LinkedIn და
-              Facebook.
-            </p>
-            <a
-              className="text-link"
-              href={siteConfig.profiles.orcid}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="ORCID პროფილის გახსნა ახალ ჩანართში"
-            >
-              ORCID: 0009-0006-8112-5084
-              <ExternalLink aria-hidden="true" />
-            </a>
+          <section aria-labelledby="profiles-title">
+            <h2 id="profiles-title">{t.profiles}</h2>
+            <p>{t.profilesText}</p>
           </section>
-
         </article>
-        <ProfileSidebar />
+        <ProfileSidebar locale={locale} label={t.summaryLabel} />
       </div>
-      <section className="section section-soft">
+
+      <section className="section section-band">
         <div className="site-shell">
-          <MembershipCard />
+          <MembershipCard locale={locale} />
         </div>
       </section>
     </>

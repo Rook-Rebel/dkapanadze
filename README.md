@@ -8,11 +8,10 @@
 
 - Next.js 16, App Router და TypeScript
 - Tailwind CSS 4 და CSS variables-ზე აგებული დიზაინ-სისტემა
-- Framer Motion — ზომიერი, `prefers-reduced-motion`-თან თავსებადი ანიმაციები
+- CSS-ზე დაფუძნებული ზომიერი მიკროანიმაციები (`prefers-reduced-motion`-თან თავსებადი, დამატებითი JavaScript-ის გარეშე)
 - KaTeX — სემანტიკურად და ვიზუალურად გამართული ფორმულები
 - Lucide React — ინტერფეისის ხატულები
-- BPG Banner Caps Alpha და ArchyEDT — ლოკალურად ჩატვირთული ქართული body/interface და display შრიფტები
-- Noto Serif Georgian Variable — ქართული serif fallback
+- BPG Banner Caps Alpha (body/interface), ArchyEDT Bold (სათაურები) და ArchyEDT Thin (დეკორატიული ციფრები) — ლოკალური WOFF2 ფაილები `src/assets/fonts/`-ში
 - STIX Two Text Variable — ინგლისური აკადემიური სათაურები და ბიბლიოგრაფია
 - Resend — server-side საკონტაქტო წერილები
 - Vinext/Vite ადაპტერი არსებული Sites გარემოსთან თავსებადობისთვის

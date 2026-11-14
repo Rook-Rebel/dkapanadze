@@ -23,7 +23,6 @@ export type Publication = {
   externalUrl?: string;
   pdfUrl?: string;
   arxivId?: string;
-  pdfPath?: string;
   publisher?: string;
   isbn?: string;
   ebookIsbn?: string;
@@ -32,14 +31,6 @@ export type Publication = {
   pageCount?: number;
   publication?: string;
   verificationNote?: string;
-};
-
-export const categoryLabels: Record<PublicationCategory, string> = {
-  analysis: "მათემატიკური ანალიზი",
-  education: "მათემატიკის განათლება",
-  fractional: "ფრაქციული აღრიცხვა",
-  monograph: "მონოგრაფია",
-  historical: "ისტორიული ნაშრომები",
 };
 
 export const publications: Publication[] = [
@@ -67,7 +58,7 @@ export const publications: Publication[] = [
       "მხები",
     ],
     verificationNote:
-      "გამოქვეყნების სტატუსი, რედაქცია და მუდმივი ბმული ჯერ არ არის მოწოდებული.",
+      "გამოცემის მონაცემები და მუდმივი ბმული ჯერ არ არის ხელმისაწვდომი.",
   },
   {
     slug: "teaching-derivative-polynomial-case",
@@ -88,7 +79,7 @@ export const publications: Publication[] = [
     formulas: ["f(x) - T_a(x) = (x - a)^2 Q(x)"],
     keywords: ["მრავალწევრი", "წარმოებული", "ალგებრული გეომეტრია", "სწავლება"],
     verificationNote:
-      "მიღების ან გამოქვეყნების დამადასტურებელი ჩანაწერი ჯერ არ არის მოწოდებული.",
+      "გამოცემის მონაცემები ჯერ არ არის ხელმისაწვდომი.",
   },
   {
     slug: "algebraic-operator-half-derivative",
@@ -135,9 +126,13 @@ export const publications: Publication[] = [
     summary:
       "ნაშრომი წარმოებულის ზღვრის გარეშე ალგებრულ-გეომეტრიულ კონსტრუქციას ავრცელებს რაციონალურ ხარისხობრივ, ექსპონენციალურ, ლოგარითმულ, ტრიგონომეტრიულ და შებრუნებულ ტრიგონომეტრიულ ფუნქციებზე.",
     abstract:
-      "პრეპრინტი წარმოებულის ზღვრის გარეშე აგების ალგებრულ-გეომეტრიულ მიდგომას ელემენტარულ ფუნქციებთან აკავშირებს. ამ ჩანაწერში მოცემულია მხოლოდ მოწოდებული სათაური, ავტორი, წელი და arXiv იდენტიფიკატორი.",
+      "პრეპრინტი წარმოებულის ზღვრის გარეშე აგების ალგებრულ-გეომეტრიულ მიდგომას ელემენტარულ ფუნქციებზე ავრცელებს. სრული ტექსტი ხელმისაწვდომია arXiv-ზე.",
     formulas: ["f(x) - T_a(x) = (x - a)^2 Q(x)"],
-    keywords: ["limit-free derivative", "elementary functions", "algebraic-geometric derivative"],
+    keywords: [
+      "წარმოებული ზღვრის გარეშე",
+      "ელემენტარული ფუნქციები",
+      "ალგებრულ-გეომეტრიული წარმოებული",
+    ],
     externalUrl: "https://arxiv.org/abs/2605.20228",
     pdfUrl: "https://arxiv.org/pdf/2605.20228",
     arxivId: "2605.20228",
@@ -186,7 +181,7 @@ export const publications: Publication[] = [
     abstract:
       "წიგნი წარმოადგენს წარმოებულის ალგებრულ და გეომეტრიულ-ფუნქციურ კონსტრუქციას ელემენტარული ფუნქციებისთვის, ზღვრის საწყის განსაზღვრებად გამოყენების გარეშე. კლასიკური ზღვრული წარმოდგენა მოგვიანებით ჩნდება, როგორც უკვე აგებული გეომეტრიული დიფერენციალის ანალიზური ფორმალიზაცია.",
     formulas: ["f(x) - T_a(x) = (x - a)^2 Q(x)"],
-    keywords: ["calculus without limits", "მონოგრაფია", "წარმოებული"],
+    keywords: ["აღრიცხვა ზღვრის გარეშე", "მონოგრაფია", "წარმოებული"],
     publisher: "AuthorHouse",
     isbn: "9798823096607",
     ebookIsbn: "9798823096614",
@@ -205,17 +200,17 @@ export const publications: Publication[] = [
     author: "Davit Kapanadze",
     year: "1999/2000",
     type: "სტატია",
-    status: "ბიბლიოგრაფია გადასამოწმებელია",
+    status: "ბიბლიოგრაფიული მონაცემები ზუსტდება",
     category: "historical",
-    categoryLabel: "ისტორიული ნაშრომები",
+    categoryLabel: "ადრეული ნაშრომები",
     summary:
       "მათემატიკური ანალიზის საფუძვლებისა და სასკოლო მათემატიკის კურსის ისტორიულ-მეთოდოლოგიური ურთიერთობის მიმოხილვა.",
     abstract:
-      "სრული ბიბლიოგრაფიული მონაცემები და ტექსტის ანოტაცია ჯერ არ არის მოწოდებული; ჩანაწერი ნეიტრალურად ასახავს მხოლოდ ცნობილ სათაურს, ავტორსა და თარიღს.",
+      "ადრეული ნაშრომის ანოტაცია ონლაინ ჯერ არ არის ხელმისაწვდომი. ჩანაწერი ასახავს ნაშრომის ცნობილ სათაურს, ავტორსა და თარიღს.",
     formulas: [],
     keywords: ["მათემატიკური ანალიზი", "სასკოლო მათემატიკა", "ისტორია", "მეთოდოლოგია"],
     verificationNote:
-      "საჭიროა ჟურნალის, ტომის, ნომრის, გვერდებისა და ზუსტი გამოცემის წლის დადასტურება.",
+      "ჟურნალის, ტომის, ნომრის, გვერდებისა და ზუსტი წლის მონაცემები ზუსტდება.",
   },
   {
     slug: "methodology-introducing-function",
@@ -226,21 +221,17 @@ export const publications: Publication[] = [
     type: "სტატია",
     status: "ბიბლიოგრაფიული ჩანაწერი",
     category: "historical",
-    categoryLabel: "ისტორიული ნაშრომები",
+    categoryLabel: "ადრეული ნაშრომები",
     summary:
       "ფუნქციის ცნების თანმიმდევრული და გასაგები შემოტანისადმი მიძღვნილი სასწავლო-მეთოდური სტატია.",
     abstract:
-      "ჩანაწერი ეფუძნება მოწოდებულ სათაურსა და გამოცემის მონაცემს. სრული ანოტაცია, გვერდები და ციფრული წყარო ჯერ არ არის მოწოდებული.",
+      "ჩანაწერი ეფუძნება ნაშრომის სათაურსა და გამოცემის მონაცემებს. სრული ანოტაცია და ციფრული ასლი ონლაინ ჯერ არ არის ხელმისაწვდომი.",
     formulas: [],
     keywords: ["ფუნქცია", "მათემატიკის სწავლება", "მეთოდიკა"],
     publication: "Physics and Mathematics at School, No. 121",
-    verificationNote: "საჭიროა გვერდებისა და გამოცემის სრული მონაცემების დადასტურება.",
+    verificationNote: "გვერდებისა და გამოცემის სრული მონაცემები ზუსტდება.",
   },
 ];
-
-export function getPublication(slug: string) {
-  return publications.find((publication) => publication.slug === slug);
-}
 
 export function getCitation(publication: Publication) {
   const details = [

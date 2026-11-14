@@ -1,142 +1,123 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ArrowRight } from "lucide-react";
+import { EssaySection } from "@/components/EssaySection";
+import { EssayToc } from "@/components/EssayToc";
 import { Formula } from "@/components/Formula";
+import { MathText } from "@/components/MathText";
+import { PageHeader } from "@/components/PageHeader";
+import { PublicationCard } from "@/components/PublicationCard";
+import { QuadraticGapDiagram } from "@/components/ResearchDiagrams";
 import { StructuredData } from "@/components/StructuredData";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
+import { getLocale } from "@/i18n/server";
+import { getPageText } from "@/i18n/content";
+import { getUi } from "@/i18n";
+import { getPublicationsBySlug, researchPublications } from "@/i18n/publications";
 
-const description =
-  "წარმოებულის ზღვრის გარეშე ალგებრულ-გეომეტრიული კონსტრუქცია — ორმაგი ფესვი, მხები წრფე და მრავალწევრის ფაქტორიზაცია.";
+const path = "/research/derivative-without-limits";
 
-export const metadata: Metadata = createMetadata({
-  title: "წარმოებული ზღვრის გარეშე",
-  description,
-  path: "/research/derivative-without-limits",
-  keywords: ["ორმაგი ფესვი", "მხები წრფე"],
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = getPageText(locale).derivative;
+  return createMetadata({
+    title: t.title,
+    description: t.description,
+    path,
+    type: "article",
+    keywords: locale === "en" ? ["double root", "tangent line"] : ["ორმაგი ფესვი", "მხები წრფე"],
+    locale,
+  });
+}
 
-const crumbs = [
-  { name: "მთავარი", href: "/" },
-  { name: "კვლევა", href: "/research" },
-  {
-    name: "წარმოებული ზღვრის გარეშე",
-    href: "/research/derivative-without-limits",
-  },
-];
+export default async function DerivativeWithoutLimitsPage() {
+  const locale = await getLocale();
+  const t = getPageText(locale).derivative;
+  const research = getPageText(locale).research.title;
+  const labels = getUi(locale);
+  const related = getPublicationsBySlug(researchPublications.derivative, locale);
+  const crumbs = [
+    { name: labels.home, href: "/" },
+    { name: research, href: "/research" },
+    { name: t.title, href: path },
+  ];
+  const contents = [
+    { id: "idea", label: t.idea },
+    { id: "quadratic", label: t.quadratic },
+    { id: "meaning", label: t.meaning },
+    { id: "scope", label: t.scope },
+    { id: "related", label: t.related },
+  ];
 
-export default function DerivativeWithoutLimitsPage() {
   return (
     <>
       <StructuredData
         data={[
-          webPageJsonLd({
-            name: "წარმოებული ზღვრის გარეშე",
-            description,
-            path: "/research/derivative-without-limits",
-          }),
+          webPageJsonLd({ name: t.title, description: t.description, path, locale }),
           breadcrumbJsonLd(crumbs),
         ]}
       />
-      <header className="page-hero">
-        <div className="site-shell page-hero-inner">
-          <Breadcrumbs
-            items={[
-              { label: "კვლევა", href: "/research" },
-              { label: "წარმოებული ზღვრის გარეშე" },
-            ]}
-          />
-          <p className="eyebrow">კვლევითი მიმართულება · 01</p>
-          <h1>წარმოებული ზღვრის გარეშე</h1>
-          <p className="lede">
-            წარმოებულის საწყისი აგება მრავალწევრი ფუნქციებისთვის — ორმაგი
-            ფესვის, მხები წრფისა და ალგებრულ-გეომეტრიული კრიტერიუმის საფუძველზე.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        locale={locale}
+        breadcrumbs={[{ label: research, href: "/research" }, { label: t.title }]}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        lede={t.lede}
+        motif="parabola"
+      />
 
-      <div className="site-shell page-content research-article">
-        <article className="research-article-copy">
-          <section id="idea">
-            <h2>საწყისი იდეა</h2>
-            <p>
-              მრავალწევრი ფუნქციის გრაფიკთან{" "}
-              <span className="math-inline">x = a</span> წერტილში მხები წრფის
-              არსებობა შეიძლება გამოიხატოს ფუნქციასა და წრფეს შორის სხვაობის
-              ალგებრული თვისებით. თუ სხვაობას ამ წერტილში ორმაგი ფესვი აქვს,
-              მაშინ მასში <span className="math-inline">(x − a)²</span> ფაქტორი
-              გამოიყოფა.
-            </p>
-            <div className="formula-panel">
-              <Formula display>
-                {"f(x) - T_a(x) = (x - a)^2 Q(x)"}
-              </Formula>
-            </div>
-          </section>
-
-          <section id="quadratic">
-            <h2>კვადრატული მოდელი</h2>
-            <p>
-              ფუნქციისთვის <span className="math-inline">f(x) = x²</span> და
-              წერტილისთვის <span className="math-inline">a</span> მხები წრფის
-              განტოლებაა{" "}
-              <span className="math-inline">Tₐ(x) = 2ax − a²</span>. სხვაობის
-              გამოთვლა უშუალოდ იძლევა სრულ კვადრატს:
-            </p>
-            <div className="formula-stack">
-              <div className="formula-panel">
-                <Formula display>{"T_a(x) = 2ax - a^2"}</Formula>
-              </div>
-              <div className="formula-panel">
-                <Formula display>
-                  {"x^2 - (2ax - a^2) = (x - a)^2"}
-                </Formula>
-              </div>
-            </div>
-          </section>
-
-          <section id="meaning">
-            <h2>ალგებრული და გეომეტრიული მნიშვნელობა</h2>
-            <p>
-              ორმაგი ფესვი აღწერს არა უბრალოდ გადაკვეთის წერტილს, არამედ
-              შეხებას. ამგვარად, დახრილობა შეიძლება გამოვლინდეს ფაქტორიზაციის
-              პირობიდან, სანამ ზღვრის ფორმალური განსაზღვრება შემოვა.
-            </p>
-          </section>
-
-          <section id="scope">
-            <h2>მიდგომის ფარგლები</h2>
-            <p>
-              საწყისი კონსტრუქცია განკუთვნილია მრავალწევრი ფუნქციებისთვის.
-              ელემენტარულ ფუნქციებზე გაფართოება წარმოდგენილია ცალკე
-              პრეპრინტში. მიდგომა არ უარყოფს ზღვრის როლს ანალიზში; ის ცვლის
-              ცნების სწავლების საწყის მარშრუტს.
-            </p>
-          </section>
-
-          <section id="related">
-            <h2>დაკავშირებული მასალები</h2>
-            <p>
-              ინტერაქტიულ სივრცეში შეგიძლიათ შეცვალოთ შეხების წერტილი და
-              ერთდროულად ნახოთ გრაფიკი, მხები და ფაქტორიზაცია.
-            </p>
-            <Link className="text-link" href="/interactive">
-              ინტერაქტიული დემონსტრაციის გახსნა
-              <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </section>
-        </article>
-
-        <aside className="research-aside" aria-label="ამ გვერდის სარჩევი">
-          <nav>
-            <a href="#idea">საწყისი იდეა</a>
-            <a href="#quadratic">კვადრატული მოდელი</a>
-            <a href="#meaning">მნიშვნელობა</a>
-            <a href="#scope">ფარგლები</a>
-            <a href="#related">დაკავშირებული მასალები</a>
-          </nav>
+      <div className="site-shell page-body article-layout">
+        <aside className="article-aside">
+          <EssayToc items={contents} title={t.contents} />
         </aside>
+
+        <article className="essay">
+          <EssaySection id="idea" number={1} title={t.idea} locale={locale}>
+            <p>
+              <MathText>{t.ideaText}</MathText>
+            </p>
+            <div className="formula-panel essay-wide">
+              <Formula display>{"f(x) - T_a(x) = (x - a)^2 Q(x)"}</Formula>
+            </div>
+          </EssaySection>
+
+          <EssaySection id="quadratic" number={2} title={t.quadratic} locale={locale}>
+            <p>
+              <MathText>{t.quadraticText}</MathText>
+            </p>
+            <div className="formula-panel formula-panel-stack essay-wide">
+              <Formula display>{"T_a(x) = 2ax - a^2"}</Formula>
+              <Formula display>{"x^2 - (2ax - a^2) = (x - a)^2"}</Formula>
+            </div>
+            <QuadraticGapDiagram locale={locale} />
+          </EssaySection>
+
+          <EssaySection id="meaning" number={3} title={t.meaning} locale={locale}>
+            <p>{t.meaningText}</p>
+          </EssaySection>
+
+          <EssaySection id="scope" number={4} title={t.scope} locale={locale}>
+            <p>{t.scopeText}</p>
+          </EssaySection>
+
+          <EssaySection id="related" number={5} title={t.related} locale={locale}>
+            <p>{t.relatedText}</p>
+            <div className="pub-list pub-list-tight essay-wide">
+              {related.map((publication) => (
+                <PublicationCard key={publication.slug} publication={publication} compact locale={locale} />
+              ))}
+            </div>
+            <div className="callout essay-wide">
+              <h3>{t.interactive}</h3>
+              <p>{t.interactiveText}</p>
+              <Link className="button button-secondary" href="/interactive">
+                {t.action}
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </div>
+          </EssaySection>
+        </article>
       </div>
     </>
   );

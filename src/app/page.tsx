@@ -1,227 +1,244 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { AcademicTimeline } from "@/components/AcademicTimeline";
 import { DigitalProjects } from "@/components/DigitalProjects";
 import { FeaturedBook } from "@/components/FeaturedBook";
 import { Formula } from "@/components/Formula";
-import { GlassCard } from "@/components/GlassCard";
 import { HeroSection } from "@/components/HeroSection";
 import { LearningSequence } from "@/components/LearningSequence";
+import { MathDivider } from "@/components/MathMotif";
+import { MathText } from "@/components/MathText";
+import { MembershipCard } from "@/components/MembershipCard";
 import { PublicationCard } from "@/components/PublicationCard";
 import { ResearchCard } from "@/components/ResearchCard";
-import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { StructuredData } from "@/components/StructuredData";
-import { siteConfig } from "@/config/site";
-import { homeContent, researchFocus } from "@/content/site-content";
-import { publications } from "@/data/publications";
+import { getLocale } from "@/i18n/server";
+import { getContent, getPageText } from "@/i18n/content";
+import { getPublicationsBySlug } from "@/i18n/publications";
+import { getSiteText } from "@/i18n/site";
 import { webPageJsonLd } from "@/lib/json-ld";
+import { createMetadata } from "@/lib/metadata";
 
-export default function HomePage() {
+const featuredPublications = [
+  "limit-free-polynomial-foundational-model",
+  "limit-free-elementary-functions",
+  "algebraic-operator-half-derivative",
+] as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const site = getSiteText(locale);
+  return createMetadata({
+    title: site.title,
+    absoluteTitle: true,
+    description: site.description,
+    path: "/",
+    locale,
+  });
+}
+
+export default async function HomePage() {
+  const locale = await getLocale();
+  const { homeContent, researchFocus } = getContent(locale);
+  const t = getPageText(locale).home;
+  const publications = getPublicationsBySlug(featuredPublications, locale);
+  const site = getSiteText(locale);
+
   return (
     <>
       <StructuredData
-        data={webPageJsonLd({
-          name: siteConfig.title,
-          description: siteConfig.description,
-          path: "/",
-        })}
+        data={webPageJsonLd({ name: site.title, description: site.description, path: "/", locale })}
       />
-      <HeroSection />
+      <HeroSection locale={locale} />
 
-      <section className="section site-shell" aria-labelledby="research-focus-title">
-        <SectionHeading
-          eyebrow="კვლევის ფოკუსი"
-          title="ერთი იდეა — რამდენიმე მათემატიკური ენა"
-          description="კვლევითი მიმართულებები აერთიანებს ალგებრულ სტრუქტურას, გეომეტრიულ ინტუიციას, ოპერატორულ კონსტრუქციას და სწავლების თანმიმდევრულ მოდელს."
-        />
-        <div className="research-grid" id="research-focus-title">
-          {researchFocus.map((research, index) => (
-            <Reveal key={research.title} delay={index * 0.08}>
-              <ResearchCard {...research} />
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="section learning-section" aria-labelledby="learning-path-title">
+      {/* 01 — Research focus (paper zone, offset heading) */}
+      <section className="section zone-paper" id="research-focus" aria-labelledby="research-focus-title">
         <div className="site-shell">
           <SectionHeading
-            eyebrow="სასწავლო არქიტექტურა"
-            title="ცნობილი სტრუქტურიდან ანალიზურ ცნებამდე"
-            description="კონცეპტუალური გზა ეტაპობრივად გადააქვს მოსწავლე ფაქტორიზაციიდან წარმოებულისა და ზღვრის ურთიერთკავშირამდე."
+            id="research-focus-title"
+            layout="split"
+            index="01"
+            eyebrow={t.researchEyebrow}
+            title={t.researchTitle}
+            description={t.researchDescription}
           />
-          <div id="learning-path-title">
-            <LearningSequence />
+          <div className="research-grid">
+            {researchFocus.map((research) => (
+              <ResearchCard key={research.title} {...research} locale={locale} />
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="section site-shell" aria-labelledby="featured-publications-title">
-        <SectionHeading
-          eyebrow="რჩეული ნაშრომები"
-          title="კვლევითი ტექსტები და ბიბლიოგრაფია"
-          description="სტატუსები შეგნებულადაა აღწერილი ნეიტრალურად და ეყრდნობა მხოლოდ მოწოდებულ ბიბლიოგრაფიულ ინფორმაციას."
-        />
-        <div className="publication-list" id="featured-publications-title">
-          {publications.slice(0, 3).map((publication) => (
-            <PublicationCard
-              key={publication.slug}
-              publication={publication}
-              compact
-            />
-          ))}
-        </div>
-        <div style={{ marginTop: "2rem" }}>
-          <Link className="button button-secondary" href="/publications">
-            სრული ბიბლიოგრაფია
-            <ArrowRight aria-hidden="true" />
-          </Link>
-        </div>
-      </section>
-
-      <section className="section section-soft">
-        <div className="site-shell">
-          <FeaturedBook />
-        </div>
-      </section>
-
-      <section className="section learning-section research-explanation-section">
+      {/* Interlude — the central idea: narrow text column beside an open derivation */}
+      <section className="section zone-ivory zone-grid" aria-labelledby="idea-title">
         <div className="site-shell idea-grid">
-          <div className="idea-copy">
-            <p className="eyebrow">ცენტრალური იდეა</p>
-            <h2>შეხება, რომელიც ფაქტორიზაციით იკითხება</h2>
-            <p>{homeContent.idea}</p>
+          <div className="idea-copy" data-reveal>
+            <p className="eyebrow">{t.ideaEyebrow}</p>
+            <h2 id="idea-title" className="section-title idea-title">
+              {t.ideaTitle}
+            </h2>
+            <p className="idea-text">{homeContent.idea}</p>
+            <Link className="text-link" href="/research/derivative-without-limits">
+              {t.ideaAction}
+              <ArrowRight aria-hidden="true" />
+            </Link>
           </div>
-          <GlassCard className="idea-proof">
-            <div className="proof-step">
-              <span>01</span>
+          <ol className="proof-steps" data-reveal>
+            <li>
+              <span className="proof-number" aria-hidden="true">
+                1
+              </span>
               <div>
-                <h3>გეომეტრიული პირობა</h3>
+                <h3>{t.geometricCondition}</h3>
                 <p>
-                  წრფე <span className="math-inline">Tₐ</span> ფუნქციის გრაფიკს{" "}
-                  <span className="math-inline">x = a</span> წერტილში ეხება.
+                  <MathText>{t.geometricText}</MathText>
                 </p>
               </div>
-            </div>
-            <div className="proof-step">
-              <span>02</span>
+            </li>
+            <li>
+              <span className="proof-number" aria-hidden="true">
+                2
+              </span>
               <div>
-                <h3>ალგებრული თარგმანი</h3>
+                <h3>{t.algebraicTranslation}</h3>
                 <p>
-                  ფუნქციისა და წრფის სხვაობას{" "}
-                  <span className="math-inline">x = a</span>-ში ორმაგი ფესვი აქვს.
+                  <MathText>{t.algebraicText}</MathText>
                 </p>
               </div>
-            </div>
-            <div className="proof-step">
-              <span>03</span>
+            </li>
+            <li>
+              <span className="proof-number" aria-hidden="true">
+                3
+              </span>
               <div>
-                <h3>ფაქტორიზაციის კრიტერიუმი</h3>
-                <div className="proof-formula">
-                  <Formula display>
-                    {"f(x) - T_a(x) = (x - a)^2 Q(x)"}
-                  </Formula>
+                <h3>{t.factorisationCriterion}</h3>
+                <p>
+                  <MathText>{t.criterionText}</MathText>
+                </p>
+                <div className="equation equation-panel">
+                  <Formula display>{"f(x) - T_a(x) = (x - a)^2 Q(x)"}</Formula>
+                  <span className="equation-number" aria-hidden="true">
+                    (1)
+                  </span>
                 </div>
               </div>
-            </div>
-          </GlassCard>
+            </li>
+          </ol>
         </div>
       </section>
 
-      <section className="section site-shell" aria-labelledby="timeline-title">
-        <SectionHeading
-          eyebrow="აკადემიური ქრონოლოგია"
-          title="თემების განვითარება დროში"
-          description="ქრონოლოგია მოიცავს მხოლოდ იმ ნაშრომებსა და წლებს, რომლებიც მოწოდებულ წყაროებშია მითითებული."
-        />
-        <div id="timeline-title">
-          <AcademicTimeline />
-        </div>
-      </section>
-
-      <section className="section learning-section">
+      {/* 02 — Selected publications, then the timeline of themes */}
+      <section className="section zone-paper" aria-labelledby="featured-publications-title">
+        <MathDivider className="section-divider" />
         <div className="site-shell">
-          <GlassCard className="teaching-preview">
-            <div className="teaching-preview-copy">
-              <p className="eyebrow">პედაგოგიური ხედვა</p>
-              <h2>გაგება — ფორმულის გამოყენებამდე</h2>
-              <p>
-                სწავლების მოდელი მოსწავლეს ჯერ ცნების შიდა სტრუქტურას აჩვენებს,
-                შემდეგ კი ფორმალურ წესებსა და ანალიზურ განსაზღვრებას უკავშირებს.
-                მიზანი არის მათემატიკური ენის გაცნობიერებული გამოყენება და არა
-                იზოლირებული ალგორითმების დამახსოვრება.
-              </p>
-              <Link className="button button-secondary" href="/teaching">
-                სწავლების ხედვის ნახვა
+          <SectionHeading
+            id="featured-publications-title"
+            layout="split"
+            index="02"
+            eyebrow={t.publicationsEyebrow}
+            title={t.publicationsTitle}
+            description={t.publicationsDescription}
+            action={
+              <Link className="text-link" href="/publications">
+                {t.bibliography}
                 <ArrowRight aria-hidden="true" />
               </Link>
-            </div>
-            <div className="teaching-preview-visual" aria-hidden="true">
-              <div className="concept-orbit">
-                <strong>კონცეპტუალური გაგება</strong>
-                <span>ალგებრა</span>
-                <span>გეომეტრია</span>
-                <span>ანალიზი</span>
-              </div>
-            </div>
-          </GlassCard>
-        </div>
-      </section>
-
-      <section className="section learning-section">
-        <div className="site-shell">
-          <div className="interactive-preview">
-            <GlassCard className="interactive-card">
-              <p className="eyebrow">ინტერაქტიული სივრცე</p>
-              <h2>ნახეთ, როგორ მოძრაობს მხები</h2>
-              <p>
-                შეცვალეთ შეხების წერტილი და დააკვირდით, როგორ განახლდება მხები,
-                მისი განტოლება და ორმაგი ფესვის ფაქტორიზაცია ერთდროულად.
-              </p>
-              <Link className="button button-primary" href="/interactive">
-                დემონსტრაციის გახსნა
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </GlassCard>
-            <div className="interactive-side">
-              <GlassCard className="mini-card">
-                <span>∂</span>
-                <h3>მხები წრფის ვიზუალიზაცია</h3>
-                <p>დინამიკური გრაფიკი და წერტილზე დამოკიდებული განტოლება.</p>
-              </GlassCard>
-              <GlassCard className="mini-card">
-                <span>D½</span>
-                <h3>ნახევარწარმოებულის ოპერატორი</h3>
-                <p>ოპერატორული თანაფარდობების კონცეპტუალური მიმოხილვა.</p>
-              </GlassCard>
-            </div>
+            }
+          />
+          <div className="pub-list pub-list-home">
+            {publications.map((publication) => (
+              <PublicationCard key={publication.slug} publication={publication} compact locale={locale} />
+            ))}
           </div>
-          <div className="projects-home-block">
+
+          <div className="timeline-block">
             <SectionHeading
-              eyebrow="ციფრული მათემატიკა"
-              title="ინტერაქტიული პროექტები"
-              description="ორი გარე პლატფორმა მათემატიკური მოდელების კვლევისა და ვიზუალური სწავლებისთვის."
+              id="timeline-title"
+              level={3}
+              eyebrow={t.timelineEyebrow}
+              title={t.timelineTitle}
+              description={t.timelineDescription}
             />
-            <DigitalProjects />
+            <AcademicTimeline locale={locale} headingLevel={4} />
           </div>
         </div>
       </section>
 
-      <section className="section section-soft">
+      {/* 03 — Teaching perspective */}
+      <section className="section zone-ivory section-wash" aria-labelledby="teaching-title">
         <div className="site-shell">
-          <div className="contact-callout">
-            <div>
-              <p className="eyebrow">აკადემიური მიმოწერა</p>
-              <h2>კვლევითი დიალოგისთვის</h2>
-              <p>
-                კვლევით თანამშრომლობასთან, გამოცემებთან ან მათემატიკის
-                სწავლებასთან დაკავშირებული წერილებისთვის გამოიყენეთ აკადემიური
-                საკონტაქტო არხი.
-              </p>
-            </div>
+          <SectionHeading
+            id="teaching-title"
+            layout="split"
+            index="03"
+            eyebrow={t.teachingEyebrow}
+            title={t.teachingTitle}
+            description={t.teachingText}
+            action={
+              <Link className="text-link" href="/teaching">
+                {t.teachingAction}
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            }
+          />
+          <LearningSequence locale={locale} />
+        </div>
+      </section>
+
+      {/* 04 — Interactive mathematics (layout mirrored: projects left, text right) */}
+      <section className="section zone-paper" aria-labelledby="interactive-title">
+        <div className="site-shell interactive-intro">
+          <div className="interactive-intro-copy" data-reveal>
+            <p className="section-index">
+              <span className="section-index-number">04</span>
+              <span className="section-index-slash" aria-hidden="true">
+                /
+              </span>
+              <span>{t.interactiveEyebrow}</span>
+            </p>
+            <h2 id="interactive-title" className="section-title">
+              {t.interactiveTitle}
+            </h2>
+            <p className="section-description">{t.interactiveText}</p>
+            <Link className="button button-primary" href="/interactive">
+              {t.openDemo}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="interactive-intro-projects">
+            <h3 className="subheading" id="projects-title">
+              {t.projectsTitle}
+            </h3>
+            <p className="muted">{t.projectsDescription}</p>
+            <DigitalProjects locale={locale} headingLevel={4} />
+          </div>
+        </div>
+      </section>
+
+      {/* Book — editorial feature */}
+      <section
+        className="section book-zone"
+        aria-label={locale === "en" ? "Monograph" : "მონოგრაფია"}
+      >
+        <MathDivider className="section-divider" />
+        <div className="site-shell">
+          <FeaturedBook locale={locale} headingId="home-book-title" />
+        </div>
+      </section>
+
+      {/* Professional membership and further contact */}
+      <section className="section zone-paper section-closing">
+        <div className="site-shell closing-grid">
+          <MembershipCard locale={locale} compact headingId="home-membership-title" />
+          <div className="contact-callout" data-reveal>
+            <p className="eyebrow">{t.contactEyebrow}</p>
+            <h2 className="section-title">{t.contactTitle}</h2>
+            <p>{t.contactText}</p>
             <Link className="button button-primary" href="/contact">
-              დაკავშირება
+              {t.contactAction}
               <ArrowRight aria-hidden="true" />
             </Link>
           </div>

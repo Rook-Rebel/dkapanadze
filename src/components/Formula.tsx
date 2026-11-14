@@ -3,16 +3,12 @@ import katex from "katex";
 type FormulaProps = {
   children: string;
   display?: boolean;
+  /** Optional spoken description; when set, the formula is exposed as role="math". */
   label?: string;
   className?: string;
 };
 
-export function Formula({
-  children,
-  display = false,
-  label,
-  className = "",
-}: FormulaProps) {
+export function Formula({ children, display = false, label, className = "" }: FormulaProps) {
   const html = katex.renderToString(children, {
     displayMode: display,
     throwOnError: false,
@@ -22,9 +18,10 @@ export function Formula({
 
   return (
     <span
-      className={`formula ${display ? "formula-display" : ""} ${className}`}
+      className={`formula ${display ? "formula-display" : "formula-inline"} ${className}`.trim()}
       dir="ltr"
-      aria-label={label}
+      translate="no"
+      {...(label ? { role: "math", "aria-label": label } : {})}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

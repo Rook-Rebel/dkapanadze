@@ -7,6 +7,7 @@ type ContactPayload = {
   subject: string;
   message: string;
   website: string;
+  locale: "ka" | "en";
 };
 
 type RateRecord = {
@@ -58,12 +59,13 @@ function cleanSingleLine(value: unknown, maxLength: number) {
 function parsePayload(input: unknown): ContactPayload | null {
   if (!input || typeof input !== "object") return null;
   const source = input as Record<string, unknown>;
-  const payload = {
+  const payload: ContactPayload = {
     name: cleanSingleLine(source.name, 100),
     email: clean(source.email, 254).toLowerCase(),
     subject: cleanSingleLine(source.subject, 160),
     message: clean(source.message, 5000),
     website: clean(source.website, 200),
+    locale: source.locale === "en" ? "en" : "ka",
   };
   const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email);
 
@@ -80,13 +82,13 @@ function parsePayload(input: unknown): ContactPayload | null {
 }
 
 export async function POST(request: NextRequest) {
+  let requestedLocale: "ka" | "en" = request.cookies.get("dk-language")?.value === "en" ? "en" : "ka";
   const identifier = clientIdentifier(request);
   if (isRateLimited(identifier)) {
     return NextResponse.json(
       {
         success: false,
-        message:
-          "მოკლე დროში გაგზავნის ლიმიტი ამოიწურა. გთხოვთ, სცადოთ მოგვიანებით.",
+        message: requestedLocale === "en" ? "The sending limit has been reached. Please try again later." : "მოკლე დროში გაგზავნის ლიმიტი ამოიწურა. გთხოვთ, სცადოთ მოგვიანებით.",
       },
       { status: 429 },
     );
@@ -95,9 +97,10 @@ export async function POST(request: NextRequest) {
   let input: unknown;
   try {
     input = await request.json();
+    requestedLocale = (input as { locale?: unknown })?.locale === "en" ? "en" : "ka";
   } catch {
     return NextResponse.json(
-      { success: false, message: "მოთხოვნის ფორმატი არასწორია." },
+      { success: false, message: requestedLocale === "en" ? "The request format is invalid." : "მოთხოვნის ფორმატი არასწორია." },
       { status: 400 },
     );
   }
@@ -107,7 +110,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "გთხოვთ, სწორად შეავსოთ ყველა სავალდებულო ველი.",
+        message: requestedLocale === "en" ? "Please complete all required fields correctly." : "გთხოვთ, სწორად შეავსოთ ყველა სავალდებულო ველი.",
       },
       { status: 400 },
     );
@@ -119,8 +122,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         mailto: true,
-        message:
-          "ონლაინ გაგზავნა ჯერ არ არის კონფიგურირებული. გამოიყენეთ აკადემიური ელფოსტა.",
+        message: payload.locale === "en" ? "Online sending is not configured yet. Please use the academic email address." : "ონლაინ გაგზავნა ჯერ არ არის კონფიგურირებული. გამოიყენეთ აკადემიური ელფოსტა.",
       },
       { status: 503 },
     );
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
   if (payload.website) {
     return NextResponse.json({
       success: true,
-      message: "მოთხოვნა მიღებულია.",
+      message: payload.locale === "en" ? "Request received." : "მოთხოვნა მიღებულია.",
     });
   }
 
@@ -158,7 +160,7 @@ export async function POST(request: NextRequest) {
         success: false,
         mailto: true,
         message:
-          "წერილის გაგზავნა ვერ მოხერხდა. გამოიყენეთ აკადემიური ელფოსტა ან სცადეთ მოგვიანებით.",
+          payload.locale === "en" ? "The message could not be sent. Please use the academic email address or try again later." : "წერილის გაგზავნა ვერ მოხერხდა. გამოიყენეთ აკადემიური ელფოსტა ან სცადეთ მოგვიანებით.",
       },
       { status: 502 },
     );
@@ -166,6 +168,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    message: "წერილი წარმატებით გაიგზავნა. გმადლობთ დაკავშირებისთვის.",
+    message: payload.locale === "en" ? "Your message was sent successfully. Thank you for getting in touch." : "წერილი წარმატებით გაიგზავნა. გმადლობთ დაკავშირებისთვის.",
   });
 }

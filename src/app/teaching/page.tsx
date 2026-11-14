@@ -1,120 +1,120 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpenText, Presentation, UsersRound } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { GlassCard } from "@/components/GlassCard";
+import { ArrowRight } from "lucide-react";
 import { LearningSequence } from "@/components/LearningSequence";
+import { PageHeader } from "@/components/PageHeader";
 import { SectionHeading } from "@/components/SectionHeading";
 import { StructuredData } from "@/components/StructuredData";
-import { teachingPrinciples } from "@/content/site-content";
+import { getLocale } from "@/i18n/server";
+import { getContent, getPageText } from "@/i18n/content";
+import { getUi } from "@/i18n";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
 
-const description =
-  "დავით კაპანაძის მათემატიკის სწავლების ხედვა — ცნობილიდან უცნობისკენ, ალგებრისა და გეომეტრიის კავშირი, კონცეპტუალური გაგება და ვიზუალიზაცია.";
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = getPageText(locale).teaching;
+  return createMetadata({
+    title: t.title,
+    description: t.description,
+    path: "/teaching",
+    keywords:
+      locale === "en"
+        ? ["mathematics education", "cognitive-constructivist model"]
+        : ["მათემატიკის სწავლება", "კოგნიტურ-კონსტრუქტივისტული მოდელი"],
+    locale,
+  });
+}
 
-export const metadata: Metadata = createMetadata({
-  title: "სწავლება",
-  description,
-  path: "/teaching",
-  keywords: ["მათემატიკის სწავლება", "კოგნიტურ-კონსტრუქტივისტული მოდელი"],
-});
+export default async function TeachingPage() {
+  const locale = await getLocale();
+  const t = getPageText(locale).teaching;
+  const labels = getUi(locale);
+  const { teachingPrinciples } = getContent(locale);
+  const crumbs = [
+    { name: labels.home, href: "/" },
+    { name: t.title, href: "/teaching" },
+  ];
+  const resources = [
+    { title: t.notes, text: t.notesText },
+    { title: t.demos, text: t.demosText },
+    { title: t.guide, text: t.guideText },
+  ];
 
-const crumbs = [
-  { name: "მთავარი", href: "/" },
-  { name: "სწავლება", href: "/teaching" },
-];
-
-export default function TeachingPage() {
   return (
     <>
       <StructuredData
         data={[
           webPageJsonLd({
-            name: "მათემატიკის სწავლება",
-            description,
+            name: locale === "en" ? "Mathematics education" : "მათემატიკის სწავლება",
+            description: t.description,
             path: "/teaching",
+            locale,
           }),
           breadcrumbJsonLd(crumbs),
         ]}
       />
-      <header className="page-hero">
-        <div className="site-shell page-hero-inner">
-          <Breadcrumbs items={[{ label: "სწავლება" }]} />
-          <p className="eyebrow">მათემატიკის განათლება</p>
-          <h1>სწავლება</h1>
-          <p className="lede">
-            რთული ანალიზური ცნების სწავლება იწყება მოსწავლისთვის ნაცნობი
-            ალგებრული და გეომეტრიული სტრუქტურებით — შემდეგ კი ფორმალურ ენას
-            თანმიმდევრულად უკავშირდება.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        locale={locale}
+        breadcrumbs={[{ label: t.title }]}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        lede={t.lede}
+        motif="steps"
+      />
 
-      <div className="site-shell page-content learning-surface teaching-learning-surface">
-        <SectionHeading
-          eyebrow="სწავლების ფილოსოფია"
-          title="მათემატიკური აზრი — წესების ჩამონათვალამდე"
-          description="სწავლების ღირებულება გამოიხატება არა დაუსაბუთებელ ეფექტურობის პრეტენზიებში, არამედ ცნების აგების ნათელ, შემოწმებად და თანმიმდევრულ გზაში."
-        />
-        <div className="principles-grid">
-          {teachingPrinciples.map((principle, index) => (
-            <article className="principle-card" key={principle.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <h2>{principle.title}</h2>
-              <p>{principle.text}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <section className="section learning-section">
+      <section className="section" aria-labelledby="philosophy-title">
         <div className="site-shell">
           <SectionHeading
-            eyebrow="კოგნიტური გზა"
-            title="ორმაგი ფესვიდან ზღვართან კავშირამდე"
-            description="თანმიმდევრობა აჩვენებს, სად შემოდის თითოეული ახალი ცნება და როგორ ეყრდნობა წინამორბედ სტრუქტურას."
+            id="philosophy-title"
+            eyebrow={t.philosophy}
+            title={t.philosophyTitle}
+            description={t.philosophyText}
           />
-          <LearningSequence />
+          <ol className="principles">
+            {teachingPrinciples.map((principle, index) => (
+              <li key={principle.title} className="principle" data-reveal>
+                <span className="principle-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3>{principle.title}</h3>
+                <p>{principle.text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      <section className="section site-shell learning-surface resource-learning-surface">
-        <SectionHeading
-          eyebrow="რესურსების არქიტექტურა"
-          title="სტუდენტებისა და მასწავლებლებისთვის"
-          description="რესურსები დაემატება მხოლოდ დადასტურებული ფაილებისა და ბმულების მოწოდების შემდეგ. ქვემოთ ნაჩვენებია დაგეგმილი სტრუქტურა და არა არარსებული ჩამოტვირთვები."
-        />
-        <div className="resource-list">
-          <GlassCard className="resource-card">
-            <BookOpenText aria-hidden="true" />
-            <h3>კონცეპტუალური ჩანაწერები</h3>
-            <p>
-              მოკლე ტექსტები, რომლებიც ფორმულას მის ალგებრულ და გეომეტრიულ
-              მნიშვნელობას უკავშირებს.
-            </p>
-          </GlassCard>
-          <GlassCard className="resource-card">
-            <Presentation aria-hidden="true" />
-            <h3>ვიზუალური დემონსტრაციები</h3>
-            <p>
-              მხები წრფის, ორმაგი ფესვისა და ოპერატორული კომპოზიციის
-              ინტერაქტიული წარმოდგენა.
-            </p>
-          </GlassCard>
-          <GlassCard className="resource-card">
-            <UsersRound aria-hidden="true" />
-            <h3>მასწავლებლის გზამკვლევი</h3>
-            <p>
-              გაკვეთილის შესაძლო თანმიმდევრობა და კითხვები კონცეპტუალური
-              დიალოგისთვის — ფაილის მოწოდების შემდეგ.
-            </p>
-          </GlassCard>
+      <section className="section section-band section-wash" aria-labelledby="path-title">
+        <div className="site-shell">
+          <SectionHeading id="path-title" eyebrow={t.path} title={t.pathTitle} description={t.pathText} />
+          <LearningSequence locale={locale} />
         </div>
-        <div style={{ marginTop: "2rem" }}>
-          <Link className="button button-secondary" href="/interactive">
-            ინტერაქტიული დემონსტრაციის ნახვა
-          </Link>
+      </section>
+
+      <section className="section" aria-labelledby="resources-title">
+        <div className="site-shell">
+          <SectionHeading
+            id="resources-title"
+            eyebrow={t.resources}
+            title={t.resourcesTitle}
+            description={t.resourcesText}
+          />
+          <ul className="resources">
+            {resources.map((resource) => (
+              <li key={resource.title} className="resource" data-reveal>
+                <span className="status-tag">{t.inPreparation}</span>
+                <h3>{resource.title}</h3>
+                <p>{resource.text}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="section-footer">
+            <Link className="button button-secondary" href="/interactive">
+              {t.action}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </section>
     </>

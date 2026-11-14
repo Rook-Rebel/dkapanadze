@@ -1,80 +1,55 @@
-import Link from "next/link";
-import { Building2, Mail, MapPin, Network } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { PortraitFrame } from "./PortraitFrame";
 import { SocialLinks } from "./SocialLinks";
+import { getUi, type Locale } from "@/i18n";
+import { getSiteText } from "@/i18n/site";
 
-export function ProfileSidebar() {
+export function ProfileSidebar({ locale, label }: { locale: Locale; label: string }) {
+  const text = getSiteText(locale);
+  const labels = getUi(locale);
+  const en = locale === "en";
+  const orcidId = siteConfig.profiles.orcid.replace("https://orcid.org/", "");
+
+  const rows = [
+    { term: en ? "Academic degree" : "აკადემიური ხარისხი", value: text.academicStatus },
+    { term: en ? "Position" : "თანამდებობა", value: text.position },
+    { term: en ? "Faculty" : "ფაკულტეტი", value: text.faculty },
+    {
+      term: en ? "Professional membership" : "პროფესიული წევრობა",
+      value: `${text.membershipRole}, ${siteConfig.membership.name} (${siteConfig.membership.postNominal})`,
+    },
+    { term: en ? "Location" : "მდებარეობა", value: text.location },
+  ];
+
   return (
-    <aside className="profile-sidebar" aria-label="აკადემიური პროფილის მოკლე მონაცემები">
-      <PortraitFrame variant="profile" />
-      <dl>
+    <aside className="profile-card" aria-label={label}>
+      <PortraitFrame variant="profile" locale={locale} />
+      <dl className="profile-facts">
+        {rows.map((row) => (
+          <div key={row.term}>
+            <dt>{row.term}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        ))}
         <div>
-          <dt>
-            <Building2 aria-hidden="true" />
-            აკადემიური სტატუსი
-          </dt>
-          <dd>{siteConfig.academic.status}</dd>
-        </div>
-        <div>
-          <dt>
-            <Building2 aria-hidden="true" />
-            თანამდებობა
-          </dt>
-          <dd>{siteConfig.academic.position}</dd>
-        </div>
-        <div>
-          <dt>
-            <Building2 aria-hidden="true" />
-            აკადემიური კავშირი
-          </dt>
-          <dd>{siteConfig.affiliation.name}</dd>
-        </div>
-        <div>
-          <dt>
-            <Building2 aria-hidden="true" />
-            ფაკულტეტი
-          </dt>
-          <dd>{siteConfig.affiliation.faculty}</dd>
-        </div>
-        <div>
-          <dt>
-            <Network aria-hidden="true" />
-            პროფესიული წევრობა
-          </dt>
-          <dd>
-            {siteConfig.membership.role}, {siteConfig.membership.name} ·{" "}
-            {siteConfig.membership.postNominal}
-          </dd>
-        </div>
-        <div>
-          <dt>
-            <MapPin aria-hidden="true" />
-            მდებარეობა
-          </dt>
-          <dd>{siteConfig.affiliation.location}</dd>
-        </div>
-        <div>
-          <dt>
-            <Mail aria-hidden="true" />
-            აკადემიური ელფოსტა
-          </dt>
+          <dt>{en ? "Academic email" : "აკადემიური ელფოსტა"}</dt>
           <dd>
             <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
           </dd>
         </div>
+        <div>
+          <dt>ORCID iD</dt>
+          <dd>
+            <a href={siteConfig.profiles.orcid} target="_blank" rel="noopener noreferrer" translate="no">
+              {orcidId}
+              <ArrowUpRight aria-hidden="true" />
+              <span className="sr-only"> {labels.newTab}</span>
+            </a>
+          </dd>
+        </div>
       </dl>
-      <Link
-        className="orcid-link"
-        href={siteConfig.profiles.orcid}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="ORCID პროფილის გახსნა ახალ ჩანართში"
-      >
-        <span>iD</span>
-        0009-0006-8112-5084
-      </Link>
-      <SocialLinks compact />
+      <SocialLinks locale={locale} exclude={["ORCID"]} />
     </aside>
   );
 }

@@ -43,7 +43,6 @@ export const siteConfig = {
     roleEnglish: "Associate Member",
     grade: "Associate",
     postNominal: "AMIMA",
-    electionDate: "2026 წლის 16 აპრილი",
     electionDateIso: "2026-04-16",
     country: "გაერთიანებული სამეფო",
     certificateImage: null,
@@ -57,18 +56,12 @@ export const siteConfig = {
     researchGate: null,
     scopus: null,
   },
-  arxivProfiles: [
-    "https://arxiv.org/abs/2607.19482",
-    "https://arxiv.org/abs/2605.20228",
-    "https://arxiv.org/abs/2604.20888",
-  ],
   book: {
     slug: "calculus-without-limits-monograph",
     title: "Calculus Without Limits",
     subtitle: "An Algebraic–Geometric Construction of the Derivative",
     author: "Davit Kapanadze",
     publisher: "AuthorHouse",
-    publicationDate: "2026 წლის 26 აპრილი",
     publicationDateIso: "2026-04-26",
     language: "ინგლისური",
     languageCode: "en",
@@ -98,15 +91,6 @@ export const siteConfig = {
         "ინტერაქტიული საგანმანათლებლო სივრცე მხები წრფის, წარმოებულის, ალგებრულ-გეომეტრიული კრიტერიუმისა და შესაბამისი მათემატიკური მოდელების ვიზუალიზაციისთვის.",
     },
   ],
-  navigation: [
-    { label: "მთავარი", href: "/" },
-    { label: "დავით კაპანაძე", href: "/davit-kapanadze" },
-    { label: "კვლევა", href: "/research" },
-    { label: "ნაშრომები", href: "/publications" },
-    { label: "სწავლება", href: "/teaching" },
-    { label: "ინტერაქტიული სივრცე", href: "/interactive" },
-    { label: "დაკავშირება", href: "/contact" },
-  ],
   keywords: [
     "დავით კაპანაძე",
     "მათემატიკოსი დავით კაპანაძე",
@@ -126,4 +110,3 @@ export const siteConfig = {
   ],
 } as const;
 
-export type NavigationItem = (typeof siteConfig.navigation)[number];

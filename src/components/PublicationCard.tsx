@@ -1,68 +1,117 @@
 import Link from "next/link";
-import { ArrowUpRight, ExternalLink, FileText } from "lucide-react";
-import type { Publication } from "@/data/publications";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { getCitation } from "@/data/publications";
 import { CopyButton } from "./CopyButton";
+import { getUi, type Locale } from "@/i18n";
+import type { LocalizedPublication } from "@/i18n/publications";
+
+/** Visual kind of a record — paired with its text label, never colour alone. */
+function publicationKind(publication: LocalizedPublication) {
+  if (publication.category === "monograph") return "book";
+  if (publication.arxivId) return "preprint";
+  if (publication.category === "historical") return "article";
+  return "manuscript";
+}
 
 export function PublicationCard({
   publication,
   compact = false,
+  showYear = true,
+  locale,
+  headingLevel = 3,
 }: {
-  publication: Publication;
+  publication: LocalizedPublication;
   compact?: boolean;
+  /** Hide the year column when entries are already grouped by year. */
+  showYear?: boolean;
+  locale: Locale;
+  headingLevel?: 2 | 3 | 4;
 }) {
+  const labels = getUi(locale);
+  const href = `/publications/${publication.slug}`;
+  const Heading = headingLevel === 2 ? "h2" : headingLevel === 4 ? "h4" : "h3";
+
   return (
-    <article className={`publication-card ${compact ? "publication-card-compact" : ""}`}>
-      <div className="publication-meta">
-        <span>{publication.year}</span>
-        <span>{publication.type}</span>
-        <span>{publication.status}</span>
-        {publication.arxivId ? (
-          <span className="arxiv-badge">arXiv:{publication.arxivId}</span>
-        ) : null}
+    <article
+      className={`pub ${compact ? "pub-compact" : ""} ${showYear ? "" : "pub-in-group"}`.replace(/\s+/g, " ").trim()}
+      data-category={publication.category}
+      data-reveal
+    >
+      <div className="pub-meta">
+        {showYear ? <p className="pub-year">{publication.year}</p> : null}
+        <p className="pub-type" data-kind={publicationKind(publication)}>
+          {publication.status}
+        </p>
       </div>
-      <div className="publication-main">
-        <p className="publication-category">{publication.categoryLabel}</p>
-        <h3 lang="en">
-          <Link href={`/publications/${publication.slug}`}>{publication.title}</Link>
-        </h3>
+      <div className="pub-body">
+        <p className="pub-kicker">{publication.categoryLabel}</p>
+        <Heading className="pub-title" lang="en">
+          <Link href={href}>{publication.title}</Link>
+        </Heading>
         {publication.subtitle ? (
-          <p className="publication-subtitle" lang="en">
+          <p className="pub-subtitle" lang="en">
             {publication.subtitle}
           </p>
         ) : null}
-        <p className="publication-georgian-title">{publication.georgianTitle}</p>
-        {!compact ? <p className="publication-summary">{publication.summary}</p> : null}
-        <p className="publication-author">{publication.author}</p>
-      </div>
-      <div className="publication-actions">
-        <CopyButton value={getCitation(publication)} label="ციტირების კოპირება" />
-        {publication.externalUrl ? (
-          <a
-            href={publication.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${publication.title} — გარე წყაროს გახსნა ახალ ჩანართში`}
-          >
-            <ExternalLink aria-hidden="true" />
-            {publication.arxivId ? "arXiv-ზე ნახვა" : "გარე წყაროს ნახვა"}
-          </a>
+        {publication.showGeorgianTitle ? (
+          <p className="pub-title-ka">{publication.georgianTitle}</p>
         ) : null}
-        {publication.pdfUrl ? (
-          <a
-            href={publication.pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${publication.title} — PDF-ის გახსნა ახალ ჩანართში`}
-          >
-            <FileText aria-hidden="true" />
-            PDF-ის გახსნა
-          </a>
-        ) : null}
-        <Link href={`/publications/${publication.slug}`}>
-          ვრცლად
-          <ArrowUpRight aria-hidden="true" />
-        </Link>
+        {compact ? (
+          <div className="pub-preview">
+            <p className="pub-summary">{publication.summary}</p>
+          </div>
+        ) : (
+          <p className="pub-summary">{publication.summary}</p>
+        )}
+        <div className="pub-footer">
+          <p className="pub-byline">
+            <span lang="en">{publication.author}</span>
+            {publication.arxivId ? (
+              <span className="pub-id" translate="no">
+                arXiv:{publication.arxivId}
+              </span>
+            ) : null}
+            {publication.isbn ? (
+              <span className="pub-id" translate="no">
+                ISBN {publication.isbn}
+              </span>
+            ) : null}
+          </p>
+          <div className="pub-actions">
+            <Link className="action-link" href={href}>
+              {labels.details}
+              <span className="sr-only">: {publication.title}</span>
+              <ArrowRight aria-hidden="true" />
+            </Link>
+            {publication.externalUrl ? (
+              <a
+                className="action-link"
+                href={publication.externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {publication.arxivId ? labels.viewArxiv : labels.externalSource}
+                <ArrowUpRight aria-hidden="true" />
+                <span className="sr-only"> {labels.newTab}</span>
+              </a>
+            ) : null}
+            {publication.pdfUrl ? (
+              <a
+                className="action-link"
+                href={publication.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {labels.openPdf}
+                <ArrowUpRight aria-hidden="true" />
+                <span className="sr-only"> {labels.newTab}</span>
+              </a>
+            ) : null}
+            {compact ? null : (
+              <CopyButton value={getCitation(publication)} label={labels.copyCitation} locale={locale} />
+            )}
+          </div>
+        </div>
       </div>
     </article>
   );

@@ -1,62 +1,64 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { Publication, PublicationCategory } from "@/data/publications";
-import { PublicationCard } from "./PublicationCard";
+import { useState, type ReactNode } from "react";
+import type { PublicationCategory } from "@/data/publications";
+import type { Locale } from "@/i18n";
+import { categoryFilters } from "@/i18n/publications";
 
-const filters: Array<{ value: "all" | PublicationCategory; label: string }> = [
-  { value: "all", label: "ყველა ნაშრომი" },
-  { value: "analysis", label: "მათემატიკური ანალიზი" },
-  { value: "education", label: "მათემატიკის განათლება" },
-  { value: "fractional", label: "ფრაქციული აღრიცხვა" },
-  { value: "monograph", label: "მონოგრაფია" },
-  { value: "historical", label: "ისტორიული ნაშრომები" },
-];
+type Filter = "all" | PublicationCategory;
 
+/**
+ * The publication archive itself is rendered on the server (children); this
+ * component only owns the filter state and hides non-matching entries (and
+ * empty year groups) via CSS.
+ */
 export function PublicationFilters({
-  publications,
+  counts,
+  locale,
+  label,
+  emptyText,
+  children,
 }: {
-  publications: Publication[];
+  counts: Record<Filter, number>;
+  locale: Locale;
+  label: string;
+  emptyText: string;
+  children: ReactNode;
 }) {
-  const [active, setActive] = useState<"all" | PublicationCategory>("all");
-  const filtered = useMemo(
-    () =>
-      active === "all"
-        ? publications
-        : publications.filter((publication) => publication.category === active),
-    [active, publications],
+  const [active, setActive] = useState<Filter>("all");
+  const labels = categoryFilters[locale];
+  const filters = (Object.keys(labels) as Filter[]).filter(
+    (filter) => filter === "all" || counts[filter] > 0,
   );
+  const shown = counts[active];
+  const total = counts.all;
 
   return (
-    <div>
-      <div className="publication-filters" aria-label="ნაშრომების ფილტრები">
-        {filters.map((filter) => (
-          <button
-            key={filter.value}
-            type="button"
-            className={active === filter.value ? "active" : ""}
-            aria-pressed={active === filter.value}
-            onClick={() => setActive(filter.value)}
-          >
-            {filter.label}
-            <span>
-              {filter.value === "all"
-                ? publications.length
-                : publications.filter(
-                    (publication) => publication.category === filter.value,
-                  ).length}
-            </span>
-          </button>
-        ))}
+    <div className="pub-browser">
+      <div className="pub-toolbar">
+        <div className="pub-filters" role="group" aria-label={label}>
+          {filters.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              aria-pressed={active === filter}
+              onClick={() => setActive(filter)}
+            >
+              {labels[filter]}
+              <span className="pub-filter-count">{counts[filter]}</span>
+            </button>
+          ))}
+        </div>
+        <p className="pub-filter-result" aria-live="polite">
+          {locale === "en"
+            ? `Showing ${shown} of ${total} ${total === 1 ? "entry" : "entries"}`
+            : `ნაჩვენებია ${shown} ჩანაწერი ${total}-დან`}
+        </p>
       </div>
-      <p className="filter-result" aria-live="polite">
-        ნაჩვენებია {filtered.length} ჩანაწერი
-      </p>
-      <div className="publication-list">
-        {filtered.map((publication) => (
-          <PublicationCard key={publication.slug} publication={publication} />
-        ))}
+      <div className="pub-archive" data-filter={active}>
+        {children}
       </div>
+      {shown === 0 ? <p className="empty-state">{emptyText}</p> : null}
     </div>
   );
 }

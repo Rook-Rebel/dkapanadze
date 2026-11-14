@@ -1,101 +1,117 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ArrowRight } from "lucide-react";
 import { Formula } from "@/components/Formula";
-import { GlassCard } from "@/components/GlassCard";
-import { LearningSequence } from "@/components/LearningSequence";
-import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { StructuredData } from "@/components/StructuredData";
-import { researchFocus } from "@/content/site-content";
+import { getLocale } from "@/i18n/server";
+import { getContent, getPageText } from "@/i18n/content";
+import { getUi } from "@/i18n";
+import { getPublicationsBySlug, researchPublications } from "@/i18n/publications";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
 
-const description =
-  "დავით კაპანაძის კვლევითი მიმართულებები: წარმოებული ზღვრის გარეშე, ნახევარწარმოებულის ოპერატორი და მათემატიკის სწავლების კონსტრუქტივისტული მოდელი.";
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = getPageText(locale).research;
+  return createMetadata({ title: t.title, description: t.description, path: "/research", locale });
+}
 
-export const metadata: Metadata = createMetadata({
-  title: "კვლევა",
-  description,
-  path: "/research",
-});
+const relatedByArea = [researchPublications.derivative, researchPublications.half, researchPublications.teaching];
 
-const crumbs = [
-  { name: "მთავარი", href: "/" },
-  { name: "კვლევა", href: "/research" },
-];
+export default async function ResearchPage() {
+  const locale = await getLocale();
+  const t = getPageText(locale).research;
+  const labels = getUi(locale);
+  const { researchFocus } = getContent(locale);
+  const crumbs = [
+    { name: labels.home, href: "/" },
+    { name: t.title, href: "/research" },
+  ];
 
-export default function ResearchPage() {
   return (
     <>
       <StructuredData
         data={[
           webPageJsonLd({
             type: "CollectionPage",
-            name: "კვლევითი მიმართულებები",
-            description,
+            name: t.areasTitle,
+            description: t.description,
             path: "/research",
+            locale,
           }),
           breadcrumbJsonLd(crumbs),
         ]}
       />
-      <header className="page-hero">
-        <div className="site-shell page-hero-inner">
-          <Breadcrumbs items={[{ label: "კვლევა" }]} />
-          <p className="eyebrow">კვლევითი პროგრამა</p>
-          <h1>კვლევა</h1>
-          <p className="lede">
-            კვლევის საერთო ღერძია ალგებრული სტრუქტურის, გეომეტრიული
-            ინტერპრეტაციისა და მათემატიკური ცნების სწავლების თანმიმდევრული
-            დაკავშირება.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        locale={locale}
+        breadcrumbs={[{ label: t.title }]}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        lede={t.lede}
+        motif="tangent"
+      />
 
-      <div className="site-shell page-content learning-surface research-learning-surface">
-        <div className="research-overview-grid">
-          {researchFocus.map((research) => (
-            <GlassCard key={research.title} className="research-overview-card">
-              <span className="index">{research.index}</span>
-              <h2>{research.title}</h2>
-              <p>{research.description}</p>
-              {research.formula ? (
-                <div className="formula-panel">
-                  <Formula display>{research.formula}</Formula>
+      <div className="site-shell page-body">
+        <h2 className="sr-only">{t.areasTitle}</h2>
+        <div className="area-list">
+          {researchFocus.map((research, index) => {
+            const related = getPublicationsBySlug(relatedByArea[index] ?? [], locale);
+            const isTeaching = research.href === "/teaching";
+            return (
+              <article key={research.title} className="area" aria-labelledby={`area-${research.index}`} data-reveal>
+                <p className="area-index" aria-hidden="true">
+                  {research.index}
+                </p>
+                <div className="area-main">
+                  <h3 id={`area-${research.index}`} className="area-title">
+                    {research.title}
+                  </h3>
+                  <p className="area-text">{research.description}</p>
+                  {research.formula ? (
+                    <div className="formula-panel">
+                      <Formula display>{research.formula}</Formula>
+                    </div>
+                  ) : null}
+                  <Link className="text-link" href={research.href}>
+                    {isTeaching ? t.teachingExplore : t.explore}
+                    <span className="sr-only">: {research.title}</span>
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
                 </div>
-              ) : null}
-              <Link className="text-link" href={research.href}>
-                მიმართულების ვრცლად ნახვა
-                <ArrowUpRight aria-hidden="true" />
-              </Link>
-            </GlassCard>
-          ))}
-          <GlassCard className="research-overview-card">
-            <span className="index">04</span>
-            <h2>კვლევითი კავშირები</h2>
-            <p>
-              კვლევითი მიმართულებები ერთმანეთისგან განცალკევებული არაა:
-              წარმოებულის კონსტრუქცია ქმნის სწავლების მოდელს, ხოლო ოპერატორული
-              აზროვნება ანალიზის გაფართოებულ სტრუქტურებს ეხება.
-            </p>
-            <Link className="text-link" href="/publications">
-              დაკავშირებული ნაშრომები
-              <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </GlassCard>
+                {related.length ? (
+                  <aside className="area-related" aria-label={`${t.relatedPublications}: ${research.title}`}>
+                    <p className="subheading">{t.relatedPublications}</p>
+                    <ul>
+                      {related.map((publication) => (
+                        <li key={publication.slug}>
+                          <Link href={`/publications/${publication.slug}`} lang="en">
+                            {publication.title}
+                          </Link>
+                          <span>
+                            {publication.year} · {publication.status}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </aside>
+                ) : null}
+              </article>
+            );
+          })}
         </div>
-      </div>
 
-      <section className="section learning-section">
-        <div className="site-shell">
-          <SectionHeading
-            eyebrow="სწავლების მოდელი"
-            title="კონცეპტუალური გადასვლების თანმიმდევრობა"
-            description="ცნების აგება იწყება ფაქტორიზაციითა და მხებით, შემდეგ გადადის დიფერენცირების წესებსა და ზღვართან ანალიზურ კავშირზე."
-          />
-          <LearningSequence />
-        </div>
-      </section>
+        <section className="area-connections" aria-labelledby="connections-title" data-reveal>
+          <h2 id="connections-title" className="section-title">
+            {t.connections}
+          </h2>
+          <p>{t.connectionsText}</p>
+          <Link className="button button-secondary" href="/publications">
+            {t.related}
+            <ArrowRight aria-hidden="true" />
+          </Link>
+        </section>
+      </div>
     </>
   );
 }

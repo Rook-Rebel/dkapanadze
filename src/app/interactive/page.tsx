@@ -1,104 +1,75 @@
 import type { Metadata } from "next";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DigitalProjects } from "@/components/DigitalProjects";
-import { GlassCard } from "@/components/GlassCard";
+import { MathIcon, type MathIconName } from "@/components/MathIcon";
+import { PageHeader } from "@/components/PageHeader";
 import { SectionHeading } from "@/components/SectionHeading";
 import { StructuredData } from "@/components/StructuredData";
 import { TangentDemo } from "@/components/TangentDemo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
+import { getLocale } from "@/i18n/server";
+import { getPageText } from "@/i18n/content";
+import { getUi } from "@/i18n";
 
-const description =
-  "ინტერაქტიული მათემატიკური სივრცე: წარმოებული ზღვრის გარეშე, მხები წრფის ვიზუალიზაცია, ორმაგი ფესვის პირობა და ნახევარწარმოებულის ოპერატორი.";
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = getPageText(locale).interactive;
+  return createMetadata({ title: t.title, description: t.description, path: "/interactive", locale });
+}
 
-export const metadata: Metadata = createMetadata({
-  title: "ინტერაქტიული სივრცე",
-  description,
-  path: "/interactive",
-});
+export default async function InteractivePage() {
+  const locale = await getLocale();
+  const t = getPageText(locale).interactive;
+  const labels = getUi(locale);
+  const crumbs = [
+    { name: labels.home, href: "/" },
+    { name: t.title, href: "/interactive" },
+  ];
 
-const crumbs = [
-  { name: "მთავარი", href: "/" },
-  { name: "ინტერაქტიული სივრცე", href: "/interactive" },
-];
-
-const topics = [
-  {
-    title: "წარმოებული ზღვრის გარეშე",
-    description: "ალგებრული პირობიდან წერტილოვანი ცვლილებისკენ.",
-    icon: "derivative",
-  },
-  {
-    title: "მხები წრფის ვიზუალიზაცია",
-    description: "შეხების წერტილისა და წრფის ერთდროული მოძრაობა.",
-    icon: "tangent",
-  },
-  {
-    title: "ორმაგი ფესვის პირობა",
-    description: "ფაქტორიზაცია, რომელიც გეომეტრიულ შეხებას აღწერს.",
-    icon: "double-root",
-  },
-  {
-    title: "ნახევარწარმოებულის ოპერატორი",
-    description: "ოპერატორული კომპოზიციის კონცეპტუალური სქემა.",
-    icon: "operator",
-  },
-] as const;
-
-export default function InteractivePage() {
   return (
     <>
       <StructuredData
         data={[
-          webPageJsonLd({
-            name: "ინტერაქტიული მათემატიკური სივრცე",
-            description,
-            path: "/interactive",
-          }),
+          webPageJsonLd({ name: t.title, description: t.description, path: "/interactive", locale }),
           breadcrumbJsonLd(crumbs),
         ]}
       />
-      <header className="page-hero">
-        <div className="site-shell page-hero-inner">
-          <Breadcrumbs items={[{ label: "ინტერაქტიული სივრცე" }]} />
-          <p className="eyebrow">მათემატიკური ლაბორატორია</p>
-          <h1>ინტერაქტიული სივრცე</h1>
-          <p className="lede">
-            ცოცხალი ვიზუალიზაციები ალგებრულ ფორმულასა და გეომეტრიულ
-            მნიშვნელობას შორის კავშირის დასანახად.
-          </p>
-        </div>
-      </header>
-
-      <div className="site-shell page-content learning-surface interactive-learning-surface">
-        <div className="interactive-topics" aria-label="ინტერაქტიული თემები">
-          {topics.map((topic, index) => (
-            <GlassCard className="interactive-topic" key={topic.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <div
-                className={`interactive-topic-icon interactive-topic-icon-${topic.icon}`}
-                aria-hidden="true"
-              >
-                <i />
-                <i />
+      <PageHeader
+        locale={locale}
+        breadcrumbs={[{ label: t.title }]}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        lede={t.lede}
+        motif="axes"
+      >
+        <ul className="topic-strip" aria-label={t.topicsLabel}>
+          {t.topics.map((topic) => (
+            <li key={topic.title}>
+              <MathIcon name={topic.icon as MathIconName} />
+              <div>
+                <strong>{topic.title}</strong>
+                <span>{topic.description}</span>
               </div>
-              <h2>{topic.title}</h2>
-              <p>{topic.description}</p>
-            </GlassCard>
+            </li>
           ))}
-        </div>
+        </ul>
+      </PageHeader>
 
-        <TangentDemo />
-
-        <section className="interactive-projects-section">
-          <SectionHeading
-            eyebrow="გარე პლატფორმები"
-            title="ინტერაქტიული პროექტები"
-            description="დამოუკიდებელი ციფრული სივრცეები მათემატიკური ექსპერიმენტის, ვიზუალიზაციისა და სწავლებისთვის. თითოეული ბმული იხსნება გარე პლატფორმაზე."
-          />
-          <DigitalProjects />
-        </section>
+      <div className="site-shell page-body">
+        <TangentDemo locale={locale} />
       </div>
+
+      <section className="section section-band" id="projects" aria-labelledby="projects-title">
+        <div className="site-shell">
+          <SectionHeading
+            id="projects-title"
+            eyebrow={t.projectsEyebrow}
+            title={t.projectsTitle}
+            description={t.projectsText}
+          />
+          <DigitalProjects locale={locale} />
+        </div>
+      </section>
     </>
   );
 }

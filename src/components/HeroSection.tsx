@@ -1,19 +1,24 @@
 import Link from "next/link";
-import { ArrowDownRight, ArrowRight } from "lucide-react";
-import { homeContent } from "@/content/site-content";
+import { ArrowDown, ArrowRight } from "lucide-react";
+import type { Locale } from "@/i18n";
+import { getContent, getPageText } from "@/i18n/content";
 import { Formula } from "./Formula";
-import { MathematicalBackground } from "./MathematicalBackground";
+import { HeroMotif } from "./MathMotif";
 import { PortraitFrame } from "./PortraitFrame";
 import { PolynomialVisual } from "./PolynomialVisual";
 
-export function HeroSection() {
+export function HeroSection({ locale }: { locale: Locale }) {
+  const { homeContent } = getContent(locale);
+  const t = getPageText(locale).home;
+  const en = locale === "en";
+
   return (
     <section className="hero" aria-labelledby="hero-title">
-      <MathematicalBackground />
+      <HeroMotif />
       <div className="site-shell hero-inner">
         <div className="hero-copy">
           <p className="eyebrow">{homeContent.eyebrow}</p>
-          <h1 id="hero-title" className="font-archy-bold">
+          <h1 id="hero-title" className="hero-title">
             {homeContent.title}
           </h1>
           <p className="hero-subtitle">{homeContent.subtitle}</p>
@@ -21,41 +26,52 @@ export function HeroSection() {
 
           <div className="hero-actions">
             <Link href="/publications" className="button button-primary">
-              ნაშრომების ნახვა
+              {t.heroPublications}
               <ArrowRight aria-hidden="true" />
             </Link>
-            <Link href="/research" className="button button-secondary">
-              კვლევითი მიმართულებები
-              <ArrowDownRight aria-hidden="true" />
+            <Link href="#research-focus" className="button button-secondary">
+              {t.heroResearch}
+              <ArrowDown aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="hero-formula">
-            <span>ცენტრალური კრიტერიუმი</span>
-            <Formula display label="ეფ იქსი მინუს ტე ქვეინდექსი ა უდრის იქსი მინუს ა კვადრატში გამრავლებული ქუ იქსზე">
-              {"f(x) - T_a(x) = (x - a)^2 Q(x)"}
-            </Formula>
-          </div>
+          <figure className="hero-criterion">
+            <figcaption>{t.heroCriterion}</figcaption>
+            <div className="equation">
+              <Formula
+                display
+                label={
+                  en
+                    ? "f of x minus T sub a of x equals x minus a, squared, times Q of x"
+                    : "ეფ იქსს მინუს ტე ა იქსი უდრის იქს მინუს ა კვადრატში, გამრავლებული ქიუ იქსზე"
+                }
+              >
+                {"f(x) - T_a(x) = (x - a)^2 Q(x)"}
+              </Formula>
+              <span className="equation-number" aria-hidden="true">
+                (1)
+              </span>
+            </div>
+          </figure>
         </div>
 
-        <div className="hero-visual-wrap">
-          <div className="hero-monogram" aria-hidden="true">
-            DK
-          </div>
-          <PortraitFrame priority variant="hero" />
-          <div className="hero-polynomial-inset">
-            <PolynomialVisual />
+        <div className="hero-visual">
+          <PortraitFrame preload variant="hero" locale={locale} />
+          <div className="hero-graph">
+            <PolynomialVisual locale={locale} />
           </div>
         </div>
       </div>
 
-      <div className="site-shell marker-row" aria-label="კვლევითი მიმართულებები">
-        {homeContent.markers.map((marker, index) => (
-          <span key={marker}>
-            <i aria-hidden="true">0{index + 1}</i>
-            {marker}
-          </span>
-        ))}
+      <div className="site-shell">
+        <ol className="hero-areas" aria-label={t.heroAreas} data-reveal>
+          {homeContent.markers.map((marker, index) => (
+            <li key={marker}>
+              <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+              {marker}
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
