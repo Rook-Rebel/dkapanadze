@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import type { Locale } from "@/i18n";
 import { getContent, getPageText } from "@/i18n/content";
@@ -25,7 +26,7 @@ export function HeroSection({ locale }: { locale: Locale }) {
           <p className="hero-statement">{homeContent.statement}</p>
 
           <div className="hero-actions">
-            <Link href="/publications" className="button button-primary">
+            <Link href={localizePath("/publications", locale)} className="button button-primary">
               {t.heroPublications}
               <ArrowRight aria-hidden="true" />
             </Link>

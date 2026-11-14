@@ -73,7 +73,7 @@ export function MobileNavigation({ open, items, locale, pathname, onClose }: Mob
         <nav aria-label={labels.mobileNavigation}>
           <ul className="mobile-nav-list">
             {items.map((item) => {
-              const active = isActivePath(pathname, item.href);
+              const active = isActivePath(pathname, item.path);
               return (
                 <li key={item.href}>
                   <Link

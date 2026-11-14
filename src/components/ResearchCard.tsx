@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { ArrowRight } from "lucide-react";
 import { Formula } from "./Formula";
 import { getUi, type Locale } from "@/i18n";
@@ -45,7 +46,7 @@ export function ResearchCard({
           </p>
         )}
       </div>
-      <Link className="text-link" href={href}>
+      <Link className="text-link" href={localizePath(href, locale)}>
         {labels.viewDirection}
         <span className="sr-only">: {title}</span>
         <ArrowRight aria-hidden="true" />

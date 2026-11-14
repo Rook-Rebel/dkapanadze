@@ -1006,9 +1006,11 @@ textarea::placeholder {
   transform: translateX(100%);
 }
 
-.lang-switch button {
+.lang-switch a {
   position: relative;
   z-index: 1;
+  display: grid;
+  place-items: center;
   min-width: 2.375rem;
   padding: 0 0.5rem;
   border: 0;
@@ -1022,21 +1024,12 @@ textarea::placeholder {
   transition: color 160ms ease;
 }
 
-.lang-switch button[aria-pressed="true"] {
+.lang-switch a[aria-current="true"] {
   color: var(--accent);
 }
 
-.lang-switch button:hover {
+.lang-switch a:hover {
   color: var(--ink);
-}
-
-.lang-switch[data-pending] {
-  cursor: progress;
-}
-
-.lang-switch[data-pending] button {
-  opacity: 0.6;
-  pointer-events: none;
 }
 
 .theme-switch {
@@ -3237,6 +3230,13 @@ h3.section-title {
   gap: 0.5rem;
 }
 
+.detail-research {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
 .detail-note {
   padding: 0.85rem 1rem;
   border-left: 3px solid var(--warning);
@@ -4936,6 +4936,26 @@ h3.section-title {
 .not-found-links a:hover {
   border-color: var(--accent-line);
   color: var(--ink);
+}
+
+/* Bilingual global 404 (no site header on this page) */
+.global-404 {
+  padding-top: clamp(2.5rem, 2rem + 3vw, 5rem);
+}
+
+.global-404 .monogram {
+  margin-bottom: 2rem;
+}
+
+.global-404-block {
+  display: grid;
+  justify-items: start;
+}
+
+.global-404-block + .global-404-block {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--line);
 }
 
 /* ==========================================================================

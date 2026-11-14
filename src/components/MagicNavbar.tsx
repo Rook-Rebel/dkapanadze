@@ -7,6 +7,7 @@ import { Mail, Menu } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { getNavigation, getUi, type Locale } from "@/i18n";
 import { isActivePath } from "@/lib/navigation";
+import { localizePath, splitLocalePath } from "@/i18n/paths";
 import { LanguageToggle } from "./LanguageToggle";
 import { MobileNavigation } from "./MobileNavigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -20,7 +21,7 @@ export function MagicNavbar({ locale }: { locale: Locale }) {
   const labels = getUi(locale);
   const items = getNavigation(locale);
   // The monogram links home and the contact page has its own call to action.
-  const desktopItems = items.filter((item) => item.href !== "/" && item.href !== "/contact");
+  const desktopItems = items.filter((item) => item.path !== "/" && item.path !== "/contact");
   const contactActive = isActivePath(pathname, "/contact");
 
   useEffect(() => {
@@ -68,8 +69,8 @@ export function MagicNavbar({ locale }: { locale: Locale }) {
         <div className="magic-nav">
           <Link
             className="monogram"
-            href="/"
-            aria-current={pathname === "/" ? "page" : undefined}
+            href={localizePath("/", locale)}
+            aria-current={splitLocalePath(pathname).path === "/" ? "page" : undefined}
           >
             <span aria-hidden="true">DK</span>
             <i aria-hidden="true">∂</i>
@@ -85,7 +86,7 @@ export function MagicNavbar({ locale }: { locale: Locale }) {
                 key={item.href}
                 href={item.href}
                 className="nav-link"
-                aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
+                aria-current={isActivePath(pathname, item.path) ? "page" : undefined}
               >
                 {item.label}
               </Link>
@@ -100,7 +101,7 @@ export function MagicNavbar({ locale }: { locale: Locale }) {
             </div>
             <Link
               className="nav-contact"
-              href="/contact"
+              href={localizePath("/contact", locale)}
               aria-current={contactActive ? "page" : undefined}
             >
               <Mail aria-hidden="true" />

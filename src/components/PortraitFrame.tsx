@@ -33,7 +33,8 @@ export function PortraitFrame({ preload = false, variant = "profile", locale }: 
           ) : null}
           <Image
             src={isHero ? "/images/davit-kapanadze-cutout.png" : siteConfig.portrait.src}
-            alt={text.portraitAlt}
+            // The contact thumbnail sits beside the printed name, so it is decorative there.
+            alt={variant === "contact" ? "" : text.portraitAlt}
             width={siteConfig.portrait.width}
             height={siteConfig.portrait.height}
             preload={preload}

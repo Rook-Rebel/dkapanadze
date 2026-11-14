@@ -1,3 +1,5 @@
+import { localizePath } from "./paths";
+
 export const locales = ["ka", "en"] as const;
 
 export type Locale = (typeof locales)[number];
@@ -9,9 +11,12 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && locales.includes(value as Locale);
 }
 
-export type NavigationItem = { label: string; href: string };
+/** `path` is the unprefixed route; `href` is the localized link target. */
+export type NavigationItem = { label: string; href: string; path: string };
 
-export const navigation: Record<Locale, readonly NavigationItem[]> = {
+type NavigationEntry = { label: string; href: string };
+
+export const navigation: Record<Locale, readonly NavigationEntry[]> = {
   ka: [
     { label: "მთავარი", href: "/" },
     { label: "დავით კაპანაძე", href: "/davit-kapanadze" },
@@ -105,8 +110,12 @@ export const ui = {
 
 export type UiLabels = (typeof ui)[Locale];
 
-export function getNavigation(locale: Locale) {
-  return navigation[locale];
+export function getNavigation(locale: Locale): NavigationItem[] {
+  return navigation[locale].map((item) => ({
+    label: item.label,
+    path: item.href,
+    href: localizePath(item.href, locale),
+  }));
 }
 
 export function getUi(locale: Locale): UiLabels {

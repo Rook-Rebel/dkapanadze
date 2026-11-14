@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { getCitation } from "@/data/publications";
 import { CopyButton } from "./CopyButton";
@@ -28,7 +29,7 @@ export function PublicationCard({
   headingLevel?: 2 | 3 | 4;
 }) {
   const labels = getUi(locale);
-  const href = `/publications/${publication.slug}`;
+  const href = localizePath(`/publications/${publication.slug}`, locale);
   const Heading = headingLevel === 2 ? "h2" : headingLevel === 4 ? "h4" : "h3";
 
   return (

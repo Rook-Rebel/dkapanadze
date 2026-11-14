@@ -1,5 +1,11 @@
-/** Whether a navigation link should be marked as the current page. */
-export function isActivePath(pathname: string, href: string) {
-  if (href.includes("#")) return false;
-  return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+import { splitLocalePath } from "@/i18n/paths";
+
+/**
+ * Whether a navigation entry (given by its unprefixed `path`) is the current
+ * page. Works identically for "/research" and "/en/research".
+ */
+export function isActivePath(pathname: string, path: string) {
+  if (path.includes("#")) return false;
+  const current = splitLocalePath(pathname).path;
+  return path === "/" ? current === "/" : current === path || current.startsWith(`${path}/`);
 }

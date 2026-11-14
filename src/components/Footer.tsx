@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { getNavigation, getUi, type Locale } from "@/i18n";
@@ -13,7 +14,7 @@ const profiles = [
 ] as const;
 
 export function Footer({ locale }: { locale: Locale }) {
-  const items = getNavigation(locale).filter((item) => !item.href.includes("#") && item.href !== "/");
+  const items = getNavigation(locale).filter((item) => !item.path.includes("#") && item.path !== "/");
   const text = getSiteText(locale);
   const labels = getUi(locale);
   const en = locale === "en";
@@ -23,7 +24,7 @@ export function Footer({ locale }: { locale: Locale }) {
       <MathDivider className="footer-divider" />
       <div className="site-shell footer-main">
         <div className="footer-identity">
-          <Link className="footer-monogram" href="/" aria-label={`${text.name} — ${labels.homePage}`}>
+          <Link className="footer-monogram" href={localizePath("/", locale)} aria-label={`${text.name} — ${labels.homePage}`}>
             DK
           </Link>
           <div>

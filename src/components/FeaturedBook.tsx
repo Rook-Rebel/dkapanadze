@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { getUi, type Locale } from "@/i18n";
@@ -84,7 +85,7 @@ export function FeaturedBook({
             <ArrowUpRight aria-hidden="true" />
             <span className="sr-only"> {labels.newTab}</span>
           </a>
-          <Link className="text-link" href={`/publications/${book.slug}`}>
+          <Link className="text-link" href={localizePath(`/publications/${book.slug}`, locale)}>
             {en ? "About the book" : "წიგნის შესახებ"}
             <ArrowRight aria-hidden="true" />
           </Link>

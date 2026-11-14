@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { ChevronRight } from "lucide-react";
 import { getUi, type Locale } from "@/i18n";
 
@@ -14,13 +15,13 @@ export function Breadcrumbs({ items, locale }: { items: BreadcrumbItem[]; locale
     <nav className="breadcrumbs" aria-label={labels.breadcrumbs}>
       <ol>
         <li>
-          <Link href="/">{labels.home}</Link>
+          <Link href={localizePath("/", locale)}>{labels.home}</Link>
         </li>
         {items.map((item) => (
           <li key={`${item.label}-${item.href ?? "current"}`}>
             <ChevronRight aria-hidden="true" />
             {item.href ? (
-              <Link href={item.href} lang={item.lang}>
+              <Link href={localizePath(item.href, locale)} lang={item.lang}>
                 {item.label}
               </Link>
             ) : (

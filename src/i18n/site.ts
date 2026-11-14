@@ -38,15 +38,15 @@ export function getSiteText(locale: Locale) {
   return {
     name: english ? siteConfig.name.english : siteConfig.name.georgian,
     title: english
-      ? "Davit Kapanadze — Mathematician, Researcher and Professor"
+      ? "Davit Kapanadze | Mathematician, Researcher and Professor"
       : siteConfig.title,
     description: english
-      ? "The academic website of Professor Davit Kapanadze: research in mathematical analysis, algebraic–geometric approaches to the derivative, fractional calculus, and mathematics education."
+      ? "Davit Kapanadze is a mathematician and professor at Georgian National University SEU, working on the derivative without limits, the half-derivative operator, and mathematics education."
       : siteConfig.description,
     tagline: english ? "Mathematics · Research · Education" : "მათემატიკა · კვლევა · განათლება",
     portraitAlt: english
-      ? "Portrait of Davit Kapanadze, mathematician and professor"
-      : "მათემატიკოსისა და პროფესორის, დავით კაპანაძის პორტრეტი",
+      ? "Davit Kapanadze, mathematician and professor"
+      : "მათემატიკოსი და პროფესორი დავით კაპანაძე",
     academicStatus: english ? siteConfig.academic.statusEnglish : siteConfig.academic.status,
     position: english ? siteConfig.academic.positionEnglish : siteConfig.academic.position,
     faculty: english ? siteConfig.academic.facultyEnglish : siteConfig.academic.faculty,

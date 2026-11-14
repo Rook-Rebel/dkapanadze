@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "დავით კაპანაძე — აკადემიური ვებსაიტი",
     short_name: "დავით კაპანაძე",
     description:
-      "მათემატიკა, კვლევა და განათლება — დავით კაპანაძის აკადემიური სივრცე.",
+      "მათემატიკა, კვლევა და განათლება — დავით კაპანაძის აკადემიური ვებსაიტი.",
     start_url: "/",
     display: "standalone",
     background_color: "#faf9f4",

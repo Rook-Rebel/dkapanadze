@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizePath } from "@/i18n/paths";
 import { Award, ArrowRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import type { Locale } from "@/i18n";
@@ -43,7 +44,7 @@ export function MembershipCard({
           {en ? "Elected" : "არჩევის თარიღი"}: <time dateTime={membership.electionDateIso}>{text.electionDate}</time>
         </p>
         {compact ? (
-          <Link className="text-link" href="/davit-kapanadze">
+          <Link className="text-link" href={localizePath("/davit-kapanadze", locale)}>
             {en ? "Academic profile" : "აკადემიური პროფილი"}
             <ArrowRight aria-hidden="true" />
           </Link>

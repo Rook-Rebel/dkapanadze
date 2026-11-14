@@ -1,60 +1,51 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { getUi, languageCookie, type Locale } from "@/i18n";
+import { useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
+import { getUi, type Locale } from "@/i18n";
+import { localizePath, splitLocalePath } from "@/i18n/paths";
+
+function subscribeToHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
 
 const options: Array<{ value: Locale; short: string }> = [
   { value: "ka", short: "KA" },
   { value: "en", short: "EN" },
 ];
 
-/** Persists the language choice for one year; read on the server via cookies(). */
-function persistLanguage(locale: Locale) {
-  document.cookie = `${languageCookie}=${locale}; path=/; max-age=31536000; samesite=lax`;
-}
-
+/**
+ * KA / EN switch. Each option is a real link to the equivalent page in the
+ * other language (/research ↔ /en/research), so it is crawlable and works
+ * without JavaScript. The two languages use separate root layouts, so the
+ * switch is a full page load by design.
+ */
 export function LanguageToggle({ locale }: { locale: Locale }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const pathname = usePathname();
   const labels = getUi(locale);
-
-  // Keep <html lang> in sync once the server has re-rendered in the new language,
-  // so fonts never switch before the text does.
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  function changeLanguage(nextLocale: Locale) {
-    if (nextLocale === locale || pending) return;
-    persistLanguage(nextLocale);
-    startTransition(() => router.refresh());
-  }
+  const { path } = splitLocalePath(pathname);
+  // Keep the reader at the same section when switching (e.g. #projects).
+  const hash = useSyncExternalStore(subscribeToHash, () => window.location.hash, () => "");
 
   return (
-    <div
-      className="lang-switch"
-      role="group"
-      aria-label={labels.chooseLanguage}
-      data-active={locale}
-      data-pending={pending ? "true" : undefined}
-      aria-busy={pending || undefined}
-    >
+    <div className="lang-switch" role="group" aria-label={labels.chooseLanguage} data-active={locale}>
       <span className="lang-switch-indicator" aria-hidden="true" />
       {options.map((option) => {
         const name = option.value === "ka" ? labels.georgian : labels.english;
+        const current = option.value === locale;
         return (
-          <button
+          <a
             key={option.value}
-            type="button"
+            href={`${localizePath(path, option.value)}${hash}`}
+            hrefLang={option.value}
             lang={option.value}
-            aria-pressed={locale === option.value}
             title={name}
-            onClick={() => changeLanguage(option.value)}
+            aria-current={current ? "true" : undefined}
           >
             <span aria-hidden="true">{option.short}</span>
             <span className="sr-only">{name}</span>
-          </button>
+          </a>
         );
       })}
     </div>
