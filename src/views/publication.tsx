@@ -13,6 +13,7 @@ import { getCitation, publications } from "@/data/publications";
 export const publicationSlugs = () => publications.map((publication) => ({ slug: publication.slug }));
 import { bookJsonLd, breadcrumbJsonLd, scholarlyArticleJsonLd } from "@/lib/json-ld";
 import { formatIsoDate } from "@/lib/format";
+import { authorLine, externalLinkLabel } from "@/lib/publication-links";
 import { createMetadata } from "@/lib/metadata";
 import { getLocalizedPublication, getPublications, researchPublications } from "@/i18n/publications";
 import { getUi, type Locale } from "@/i18n";
@@ -30,11 +31,11 @@ export function publicationMetadata(slug: string, locale: Locale): Metadata {
   const publication = getLocalizedPublication(slug, locale);
   if (!publication) return {};
   const en = locale === "en";
-  const isBook = publication.category === "monograph";
+  const isBook = publication.category === "monograph" || publication.kind === "textbook";
   // Built only from the verified record: status, author, year and summary.
   const description = en
-    ? `${publication.status} by ${publication.author} (${publication.year}). ${publication.summary}`
-    : `${publication.status}, ${siteConfig.name.georgian} (${publication.year}). ${publication.summary}`;
+    ? `${publication.status} by ${authorLine(publication)} (${publication.year}). ${publication.summary}`
+    : `${publication.status}, ${publication.authors ? authorLine(publication) : siteConfig.name.georgian} (${publication.year}). ${publication.summary}`;
 
   return createMetadata({
     title: en ? publication.title : publication.georgianTitle,
@@ -43,10 +44,10 @@ export function publicationMetadata(slug: string, locale: Locale): Metadata {
     type: isBook ? "book" : "article",
     keywords: publication.keywords,
     locale,
-    article: isBook ? undefined : { authors: [publication.author], tags: publication.keywords },
+    article: isBook ? undefined : { authors: publication.authors ?? [publication.author], tags: publication.keywords },
     book: isBook
       ? {
-          authors: [publication.author],
+          authors: publication.authors ?? [publication.author],
           isbn: publication.isbn,
           releaseDate: publication.publicationDate,
           tags: publication.keywords,
@@ -81,8 +82,10 @@ export function PublicationView({ slug, locale }: { slug: string; locale: Locale
     { name: en ? publication.title : publication.georgianTitle, href: `/publications/${publication.slug}` },
   ];
 
-  const details: Array<{ term: string; value: string; lang?: string; translate?: boolean }> = [
-    { term: en ? "Author" : "ავტორი", value: publication.author, lang: "en" },
+  const details: Array<{ term: string; value: string; lang?: string; translate?: boolean; href?: string }> = [
+    publication.authors
+      ? { term: en ? "Authors" : "ავტორები", value: authorLine(publication), lang: "en" }
+      : { term: en ? "Author" : "ავტორი", value: publication.author, lang: "en" },
     { term: en ? "Year" : "წელი", value: publication.year },
     { term: en ? "Type" : "ტიპი", value: publication.type },
     { term: en ? "Status" : "სტატუსი", value: publication.status },
@@ -90,13 +93,23 @@ export function PublicationView({ slug, locale }: { slug: string; locale: Locale
   ];
   if (publication.arxivId) details.push({ term: "arXiv", value: publication.arxivId, translate: false });
   if (publication.publication)
-    details.push({ term: en ? "Published in" : "გამოცემა", value: publication.publication, lang: "en" });
+    details.push({ term: en ? "Published in" : "გამოცემა", value: publication.publication });
+  if (publication.pages && !publication.publication?.includes(publication.pages))
+    details.push({ term: en ? "Pages" : "გვერდები", value: publication.pages });
+  if (publication.issn) details.push({ term: "ISSN", value: publication.issn, translate: false });
+  if (publication.doi)
+    details.push({ term: "DOI", value: publication.doi, translate: false, href: `https://doi.org/${publication.doi}` });
+  if (publication.halId)
+    details.push({ term: "HAL", value: publication.halId, translate: false, href: `https://hal.science/${publication.halId}` });
   if (publication.publisher)
     details.push({ term: en ? "Publisher" : "გამომცემლობა", value: publication.publisher, lang: "en" });
   if (publication.publicationDate)
     details.push({ term: en ? "Publication date" : "გამოცემის თარიღი", value: formatIsoDate(publication.publicationDate, locale) });
   if (publication.language)
-    details.push({ term: en ? "Language" : "ენა", value: en ? publication.language : publication.language === "English" ? "ინგლისური" : publication.language });
+    details.push({ term: en ? "Language" : "ენა", value: en
+        ? publication.language
+        : ({ English: "ინგლისური", Georgian: "ქართული" } as Record<string, string>)[publication.language] ?? publication.language,
+    });
   if (publication.pageCount)
     details.push({ term: en ? "Pages" : "გვერდები", value: String(publication.pageCount) });
   if (publication.isbn)
@@ -113,7 +126,9 @@ export function PublicationView({ slug, locale }: { slug: string; locale: Locale
     <>
       <StructuredData
         data={[
-          publication.category === "monograph" ? bookJsonLd(publication, locale) : scholarlyArticleJsonLd(publication, locale),
+          publication.category === "monograph" || publication.kind === "textbook"
+            ? bookJsonLd(publication, locale)
+            : scholarlyArticleJsonLd(publication, locale),
           breadcrumbJsonLd(crumbs, locale),
         ]}
       />
@@ -202,7 +217,15 @@ export function PublicationView({ slug, locale }: { slug: string; locale: Locale
               <div key={row.term}>
                 <dt>{row.term}</dt>
                 <dd lang={row.lang} translate={row.translate === false ? "no" : undefined}>
-                  {row.value}
+                  {row.href ? (
+                    <a href={row.href} target="_blank" rel="noopener noreferrer">
+                      {row.value}
+                      <ArrowUpRight aria-hidden="true" />
+                      <span className="sr-only"> {labels.newTab}</span>
+                    </a>
+                  ) : (
+                    row.value
+                  )}
                 </dd>
               </div>
             ))}
@@ -216,15 +239,7 @@ export function PublicationView({ slug, locale }: { slug: string; locale: Locale
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {publication.arxivId
-                  ? en
-                    ? "View on arXiv"
-                    : "arXiv-ზე ნახვა"
-                  : publication.category === "monograph"
-                    ? en
-                      ? "View at the publisher"
-                      : "გამომცემლის გვერდი"
-                    : labels.externalSource}
+                {externalLinkLabel(publication, locale, "long")}
                 <ArrowUpRight aria-hidden="true" />
                 <span className="sr-only"> {labels.newTab}</span>
               </a>

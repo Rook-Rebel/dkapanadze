@@ -4,7 +4,7 @@ import { publications, type Publication, type PublicationCategory } from "@/data
 type Translation = Pick<
   Publication,
   "type" | "status" | "categoryLabel" | "summary" | "abstract" | "keywords"
-> & { verificationNote?: string };
+> & { verificationNote?: string; publication?: string };
 
 const english: Record<string, Translation> = {
   "cognitive-constructivist-foundations-derivative-without-limits": {
@@ -71,25 +71,118 @@ const english: Record<string, Translation> = {
   },
   "foundations-analysis-school-course": {
     type: "Article",
-    status: "Bibliographic details being verified",
+    status: "Journal article",
     categoryLabel: "Earlier works",
     summary:
       "A historical and methodological review of the relationship between the foundations of mathematical analysis and the school mathematics curriculum.",
     abstract:
-      "An abstract of this earlier work is not yet available online. The record lists the known title, author, and date.",
+      "An early article on the relationship between the foundations of mathematical analysis and the school mathematics course, published in Physics and Mathematics at School (No. 116). It is available on Academia.edu.",
     keywords: ["mathematical analysis", "school mathematics", "history", "methodology"],
-    verificationNote: "The journal, volume, issue, pages, and exact year are being verified.",
+    publication: "Physics and Mathematics at School, No. 116",
+    verificationNote:
+      "The page range and a direct link to the paper have not been added yet; the link points to the author's Academia.edu profile.",
   },
   "methodology-introducing-function": {
     type: "Article",
-    status: "Bibliographic record",
+    status: "Journal article",
     categoryLabel: "Earlier works",
     summary:
       "A methodological article on introducing the concept of function in a progressive and comprehensible way.",
     abstract:
-      "This record is based on the article’s title and publication details. A full abstract and a digital copy are not yet available online.",
+      "A methodological article on introducing the concept of function, published in Physics and Mathematics at School, pp. 52–57. It is available on Academia.edu.",
     keywords: ["function", "mathematics education", "methodology"],
-    verificationNote: "The page range and full publication details are being verified.",
+    publication: "Physics and Mathematics at School, No. 121",
+  },
+  "teaching-derivative-tangent-model-dynamic-visualization": {
+    type: "Article",
+    status: "Journal article",
+    categoryLabel: "Mathematics education",
+    summary:
+      "The article examines teaching the derivative through an algebraic–geometric tangent model combined with dynamic visualization.",
+    abstract:
+      "Published in the International Journal on Integrating Technology in Education (IJITE), vol. 15, no. 2, pp. 15–27. The full text is available on the journal's website.",
+    keywords: ["derivative", "tangent", "dynamic visualization", "mathematics education"],
+  },
+  "teaching-derivative-without-initial-limits": {
+    type: "Article",
+    status: "Journal article",
+    categoryLabel: "Mathematics education",
+    summary:
+      "The article examines teaching the derivative without the initial use of limits, from a cognitive-constructivist and algebraic–geometric perspective.",
+    abstract:
+      "Published in the journal Intellecti, No. 2(82), pp. 107–114 (ISSN 1512-0333). The article is written in Georgian.",
+    keywords: ["derivative without limits", "constructivist teaching", "mathematics education"],
+    publication: "Intellecti, No. 2(82), pp. 107–114",
+  },
+  "half-order-recurrence-fractional-differentiation-monomials": {
+    type: "Preprint",
+    status: "arXiv preprint",
+    categoryLabel: "Fractional calculus",
+    summary:
+      "The paper extends the half-order recurrence on monomials to differentiation of general fractional order, using functional continuation and operator composition.",
+    abstract:
+      "The paper extends the half-order recurrence on monomials to differentiation of general fractional order, using functional continuation and operator composition. The full text is available on arXiv.",
+    keywords: ["fractional differentiation", "half-derivative", "operator composition", "monomials"],
+  },
+  "student-question-half-derivative-teaching-model": {
+    type: "Preprint",
+    status: "arXiv preprint",
+    categoryLabel: "Mathematics education",
+    summary:
+      "The paper presents a constructivist teaching model that leads from a student's question to the concept of the half-derivative (Part I).",
+    abstract:
+      "The paper presents a constructivist teaching model that leads from a student's question to the concept of the half-derivative. This is the first part of a series; the full text is available on arXiv.",
+    keywords: ["half-derivative", "constructivist teaching", "mathematics education"],
+  },
+  "derivative-without-limits-review-comparative-analysis": {
+    type: "Review",
+    status: "Available on Academia.edu",
+    categoryLabel: "Mathematical analysis",
+    summary:
+      "A review of the algebraic–geometric construction of the derivative without limits, with a comparative analysis.",
+    abstract:
+      "A review of the algebraic–geometric construction of the derivative without limits, with a comparative analysis. The paper is available on Academia.edu.",
+    keywords: ["derivative without limits", "review", "comparative analysis"],
+    verificationNote: "A direct link to the paper has not been added yet; the link points to the author's Academia.edu profile.",
+  },
+  "fractional-derivatives-constructive-research-programme": {
+    type: "Research paper",
+    status: "Available on Academia.edu",
+    categoryLabel: "Fractional calculus",
+    summary:
+      "The paper discusses the motivation for and applications of fractional derivatives, and sets out a constructive research programme.",
+    abstract:
+      "The paper discusses the motivation for and applications of fractional derivatives, and sets out a constructive research programme. The full text is available on Academia.edu.",
+    keywords: ["fractional derivatives", "fractional calculus", "research programme"],
+  },
+  "algebraic-geometric-model-teaching-derivative-guide": {
+    type: "Methodological guide",
+    status: "Available on Academia.edu",
+    categoryLabel: "Mathematics education",
+    summary:
+      "A methodological guide to an algebraic–geometric model for teaching the derivative, with two lesson scenarios.",
+    abstract:
+      "A methodological guide to an algebraic–geometric model for teaching the derivative, with two lesson scenarios. The full text is available on Academia.edu.",
+    keywords: ["derivative", "methodological guide", "lesson scenarios", "mathematics education"],
+  },
+  "mathematics-10-school-textbook": {
+    type: "School textbook",
+    status: "Published textbook",
+    categoryLabel: "Earlier works",
+    summary:
+      "A Grade 10 school mathematics textbook (co-authored). Selected sections are available on Academia.edu.",
+    abstract:
+      "A Grade 10 school mathematics textbook, published by Diogene Publishing House (Tbilisi, 2006). Selected sections are available on Academia.edu.",
+    keywords: ["school textbook", "mathematics", "Grade 10"],
+  },
+  "polynomial-behaviour-derivatives": {
+    type: "Research paper",
+    status: "Available on Academia.edu",
+    categoryLabel: "Earlier works",
+    summary: "A study of the behaviour of polynomials using derivatives.",
+    abstract: "An early paper on investigating the behaviour of polynomials using derivatives. The paper is available on Academia.edu.",
+    keywords: ["polynomial", "derivative", "function analysis"],
+    verificationNote: "A direct link to the paper has not been added yet; the link points to the author's Academia.edu profile.",
   },
 };
 
@@ -144,9 +237,18 @@ export const researchPublications = {
     "limit-free-polynomial-foundational-model",
     "limit-free-elementary-functions",
     "calculus-without-limits-monograph",
+    "derivative-without-limits-review-comparative-analysis",
   ],
-  half: ["algebraic-operator-half-derivative"],
+  half: [
+    "algebraic-operator-half-derivative",
+    "half-order-recurrence-fractional-differentiation-monomials",
+    "fractional-derivatives-constructive-research-programme",
+  ],
   teaching: [
+    "teaching-derivative-tangent-model-dynamic-visualization",
+    "teaching-derivative-without-initial-limits",
+    "student-question-half-derivative-teaching-model",
+    "algebraic-geometric-model-teaching-derivative-guide",
     "cognitive-constructivist-foundations-derivative-without-limits",
     "teaching-derivative-polynomial-case",
   ],

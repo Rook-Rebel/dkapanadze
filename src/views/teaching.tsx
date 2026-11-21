@@ -4,11 +4,13 @@ import { localizePath } from "@/i18n/paths";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { LearningSequence } from "@/components/LearningSequence";
+import { PublicationCard } from "@/components/PublicationCard";
 import { PageHeader } from "@/components/PageHeader";
 import { SectionHeading } from "@/components/SectionHeading";
 import { StructuredData } from "@/components/StructuredData";
 import { getContent, getPageText } from "@/i18n/content";
 import { getUi } from "@/i18n";
+import { getPublicationsBySlug, researchPublications } from "@/i18n/publications";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
 
@@ -30,6 +32,7 @@ export function TeachingView({ locale }: { locale: Locale }) {
   const t = getPageText(locale).teaching;
   const labels = getUi(locale);
   const { teachingPrinciples } = getContent(locale);
+  const teachingPublications = getPublicationsBySlug(researchPublications.teaching, locale);
   const crumbs = [
     { name: labels.home, href: "/" },
     { name: t.title, href: "/teaching" },
@@ -88,6 +91,32 @@ export function TeachingView({ locale }: { locale: Locale }) {
         <div className="site-shell">
           <SectionHeading id="path-title" eyebrow={t.path} title={t.pathTitle} description={t.pathText} />
           <LearningSequence locale={locale} />
+        </div>
+      </section>
+
+      <section className="section zone-paper" aria-labelledby="teaching-publications-title">
+        <div className="site-shell">
+          <SectionHeading
+            id="teaching-publications-title"
+            eyebrow={locale === "en" ? "Publications" : "ნაშრომები"}
+            title={locale === "en" ? "Publications on teaching the derivative" : "ნაშრომები წარმოებულის სწავლების შესახებ"}
+            description={
+              locale === "en"
+                ? "Journal articles, preprints and methodological work behind this teaching approach."
+                : "ჟურნალის სტატიები, პრეპრინტები და მეთოდოლოგიური ნაშრომები, რომლებსაც ეს მიდგომა ეფუძნება."
+            }
+            action={
+              <Link className="text-link" href={localizePath("/publications", locale)}>
+                {locale === "en" ? "All publications" : "ყველა ნაშრომი"}
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            }
+          />
+          <div className="pub-list">
+            {teachingPublications.map((publication) => (
+              <PublicationCard key={publication.slug} publication={publication} compact locale={locale} />
+            ))}
+          </div>
         </div>
       </section>
 

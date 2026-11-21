@@ -60,7 +60,8 @@ const english = {
     { title: "Connection to the limit", description: "The constructed geometric concept is linked to its analytic formalisation.", icon: "limit" },
   ],
   timeline: [
-    { period: "1999/2000", title: "Historical and methodological research", text: "A review of the relationship between the foundations of mathematical analysis and the school mathematics curriculum." },
+    { period: "1993", title: "Polynomial behaviour and the derivative", text: "A study of the behaviour of polynomials using derivatives." },
+    { period: "2000", title: "Historical and methodological research", text: "A review of the relationship between the foundations of mathematical analysis and the school mathematics curriculum." },
     { period: "2005", title: "Teaching the concept of function", text: "A methodological study on introducing the concept of function." },
     { period: "2026", title: "The algebraic–geometric programme", text: "Work on constructing the derivative without limits and on its constructivist teaching model." },
     { period: "2026", title: "The half-derivative operator", text: "An algebraic construction of half-order differentiation on a graded monomial space." },
@@ -130,11 +131,11 @@ export const pageText = {
       publicationsEyebrow: "რჩეული ნაშრომები",
       publicationsTitle: "კვლევითი ტექსტები და ბიბლიოგრაფია",
       publicationsDescription:
-        "ბოლოდროინდელი პრეპრინტები, ხელნაწერები და მონოგრაფია. თითოეულ ჩანაწერზე მითითებულია მისი გამოქვეყნების ამჟამინდელი სტატუსი.",
+        "ბოლოდროინდელი ჟურნალის სტატიები, პრეპრინტები და მონოგრაფია. თითოეულ ჩანაწერზე მითითებულია მისი გამოქვეყნების სტატუსი.",
       bibliography: "სრული ბიბლიოგრაფია",
       timelineEyebrow: "აკადემიური ქრონოლოგია",
       timelineTitle: "თემების განვითარება დროში",
-      timelineDescription: "ადრეული მეთოდური კვლევებიდან მიმდინარე ალგებრულ-გეომეტრიულ პროგრამამდე.",
+      timelineDescription: "ადრეული კვლევებიდან მიმდინარე ალგებრულ-გეომეტრიულ პროგრამამდე.",
       teachingEyebrow: "პედაგოგიური ხედვა",
       teachingTitle: "გაგება — ფორმულის გამოყენებამდე",
       teachingText:
@@ -258,7 +259,7 @@ export const pageText = {
       eyebrow: "აკადემიური ბიბლიოგრაფია",
       description:
         "დავით კაპანაძის ნაშრომების ბიბლიოგრაფია — მათემატიკური ანალიზი, მათემატიკის განათლება, ფრაქციული აღრიცხვა და ადრეული მეთოდური ნაშრომები.",
-      lede: "პრეპრინტები, ხელნაწერები, მონოგრაფია და ადრეული მეთოდური სტატიები. თითოეულ ჩანაწერზე მითითებულია მისი გამოქვეყნების ამჟამინდელი სტატუსი.",
+      lede: "ჟურნალის სტატიები, პრეპრინტები, მონოგრაფია, სასკოლო სახელმძღვანელო და ადრეული მეთოდური ნაშრომები. თითოეულ ჩანაწერზე მითითებულია მისი გამოქვეყნების სტატუსი.",
       featuredBook: "მონოგრაფია",
       listTitle: "ნაშრომების ჩამონათვალი",
       filterLabel: "ნაშრომების ფილტრი კატეგორიის მიხედვით",
@@ -357,11 +358,11 @@ export const pageText = {
       publicationsEyebrow: "Selected publications",
       publicationsTitle: "Research texts and bibliography",
       publicationsDescription:
-        "Recent preprints, manuscripts, and the monograph. Each entry states its current publication status.",
+        "Recent journal articles, preprints, and the monograph. Each entry states its publication status.",
       bibliography: "Full bibliography",
       timelineEyebrow: "Academic timeline",
       timelineTitle: "How the themes developed",
-      timelineDescription: "From early methodological studies to the current algebraic–geometric programme.",
+      timelineDescription: "From early studies to the current algebraic–geometric programme.",
       teachingEyebrow: "Teaching perspective",
       teachingTitle: "Understanding before formulas",
       teachingText:
@@ -484,7 +485,7 @@ export const pageText = {
       eyebrow: "Academic bibliography",
       description:
         "A bibliography of Davit Kapanadze’s work in mathematical analysis, mathematics education, fractional calculus, and earlier methodological studies.",
-      lede: "Preprints, manuscripts, a monograph, and earlier methodological articles. Each entry states its current publication status.",
+      lede: "Journal articles, preprints, a monograph, a school textbook, and earlier methodological work. Each entry states its publication status.",
       featuredBook: "Monograph",
       listTitle: "List of publications",
       filterLabel: "Filter publications by category",

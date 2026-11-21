@@ -23,6 +23,7 @@ import { webPageJsonLd } from "@/lib/json-ld";
 import { createMetadata } from "@/lib/metadata";
 
 const featuredPublications = [
+  "teaching-derivative-tangent-model-dynamic-visualization",
   "limit-free-polynomial-foundational-model",
   "limit-free-elementary-functions",
   "algebraic-operator-half-derivative",

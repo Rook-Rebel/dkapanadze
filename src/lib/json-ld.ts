@@ -8,6 +8,14 @@ const personId = `${siteConfig.domain}/#person`;
 const websiteId = `${siteConfig.domain}/#website`;
 const orcidId = siteConfig.profiles.orcid.replace("https://orcid.org/", "");
 
+/** Authors in order: Davit Kapanadze is referenced by @id, co-authors by name only. */
+function authorsJsonLd(publication: Publication) {
+  const names = publication.authors ?? [publication.author];
+  return names.map((name) =>
+    /kapanadze/i.test(name) ? { "@id": personId } : { "@type": "Person", name },
+  );
+}
+
 /** The person behind the site — verified facts only. Emitted once per page (root layout). */
 export const personJsonLd = {
   "@context": "https://schema.org",
@@ -125,19 +133,38 @@ export function scholarlyArticleJsonLd(publication: Publication & { summary: str
     name: publication.title,
     headline: publication.title,
     alternativeHeadline: publication.georgianTitle,
-    author: { "@id": personId },
-    inLanguage: "en",
+    author: authorsJsonLd(publication),
+    inLanguage: publication.language === "Georgian" ? "ka" : "en",
     description: publication.summary,
     abstract: publication.abstract,
     keywords: publication.keywords.join(", "),
     isPartOf: { "@id": websiteId },
   };
 
-  if (/^\d{4}$/.test(publication.year)) article.dateCreated = publication.year;
-  if (publication.externalUrl) article.sameAs = publication.externalUrl;
-  if (publication.arxivId) {
-    article.identifier = { "@type": "PropertyValue", propertyID: "arXiv", value: publication.arxivId };
+  if (/^\d{4}$/.test(publication.year)) {
+    // Journal articles carry their publication year; other records only a creation year.
+    if (publication.kind === "journal") article.datePublished = publication.year;
+    else article.dateCreated = publication.year;
   }
+  const sameAs = [
+    publication.externalUrl,
+    publication.doi ? `https://doi.org/${publication.doi}` : undefined,
+    publication.halId ? `https://hal.science/${publication.halId}` : undefined,
+  ].filter(Boolean);
+  if (sameAs.length) article.sameAs = sameAs;
+  const identifiers = [
+    publication.arxivId ? { "@type": "PropertyValue", propertyID: "arXiv", value: publication.arxivId } : null,
+    publication.doi ? { "@type": "PropertyValue", propertyID: "DOI", value: publication.doi } : null,
+    publication.halId ? { "@type": "PropertyValue", propertyID: "HAL", value: publication.halId } : null,
+  ].filter(Boolean);
+  if (identifiers.length) article.identifier = identifiers;
+  if (publication.journal) {
+    article.isPartOf = [
+      { "@id": websiteId },
+      { "@type": "Periodical", name: publication.journal, ...(publication.issn ? { issn: publication.issn } : {}) },
+    ];
+  }
+  if (publication.pages) article.pagination = publication.pages;
   if (publication.pdfUrl) {
     article.encoding = { "@type": "MediaObject", encodingFormat: "application/pdf", contentUrl: publication.pdfUrl };
   }
@@ -163,10 +190,10 @@ export function bookJsonLd(publication: Publication & { summary: string }, local
     mainEntityOfPage: url,
     name: publication.title,
     alternateName: publication.georgianTitle,
-    author: { "@id": personId },
+    author: authorsJsonLd(publication),
     publisher: publication.publisher ? { "@type": "Organization", name: publication.publisher } : undefined,
-    datePublished: publication.publicationDate,
-    inLanguage: publication.language === "English" ? "en" : undefined,
+    datePublished: publication.publicationDate ?? (/^\d{4}$/.test(publication.year) ? publication.year : undefined),
+    inLanguage: publication.language === "English" ? "en" : publication.kind === "textbook" ? "ka" : undefined,
     numberOfPages: publication.pageCount,
     isbn: publication.isbn,
     workExample: editions.length ? editions : undefined,
